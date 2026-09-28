@@ -16,7 +16,7 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background-color: #010203;
+            background-color: #080808;
             font-family: -apple-system, "SF Pro Display", "Courier New", monospace;
             overflow: hidden;
             display: flex;
@@ -29,8 +29,8 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background: radial-gradient(circle at center, #070d12 0%, #020406 85%, #000000 100%);
-            border: 1px solid rgba(0, 229, 204, 0.12);
+            background: radial-gradient(circle at center, #191a21 0%, #111216 75%, #0d0d0d 100%);
+            border: 1px solid rgba(74, 122, 150, 0.15);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -43,27 +43,27 @@
             padding-right: max(14px, env(safe-area-inset-right));
         }
 
-        /* Glass Reflection Line + VFD Phosphor Mesh Overlay */
+        /* Glass Reflection Line + VFD Mesh Overlay */
         .cyber-bezel::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: 
-                linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.2) 100%),
-                linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 50%),
-                radial-gradient(circle, rgba(0, 229, 204, 0.04) 1px, transparent 1px);
+                linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.25) 100%),
+                linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.55) 50%),
+                radial-gradient(circle, rgba(74, 122, 150, 0.05) 1px, transparent 1px);
             background-size: 100% 100%, 100% 3px, 3px 3px;
             z-index: 6;
             pointer-events: none;
             opacity: 0.9;
         }
 
-        /* 80s Cassette / Hi-Fi Corner Technical Markings */
+        /* 80s Cassette Technical Markings */
         .corner-tag {
             position: absolute;
             font-size: 8px;
             letter-spacing: 1.5px;
-            color: rgba(0, 229, 204, 0.3);
+            color: rgba(194, 194, 194, 0.25);
             z-index: 5;
             text-transform: uppercase;
             font-family: monospace;
@@ -81,18 +81,18 @@
             align-items: center;
             padding: 0 4px;
             margin-top: 8px;
-            color: #00e5cc;
+            color: #2d5066;
             font-size: 9px;
             letter-spacing: 2px;
-            border-bottom: 1px solid rgba(0, 229, 204, 0.12);
+            border-bottom: 1px solid rgba(74, 122, 150, 0.15);
             z-index: 4;
-            text-shadow: 0 0 6px rgba(0, 229, 204, 0.4);
+            text-shadow: 0 0 6px rgba(45, 80, 102, 0.4);
         }
 
         .corp-logo {
             font-weight: 700;
             letter-spacing: 2.5px;
-            color: #80f0df;
+            color: #c2c2c2;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -100,13 +100,13 @@
         .corp-logo::before {
             content: "■";
             font-size: 7px;
-            color: #ffaa00;
+            color: #aa4b5a;
         }
 
         .hud-metrics {
             display: flex;
             gap: 12px;
-            color: rgba(0, 229, 204, 0.55);
+            color: rgba(194, 194, 194, 0.4);
             font-size: 8px;
             font-family: monospace;
         }
@@ -139,26 +139,26 @@
             align-items: center;
             padding: 0 4px;
             margin-bottom: 6px;
-            color: rgba(0, 229, 204, 0.35);
+            color: rgba(194, 194, 194, 0.3);
             font-size: 8px;
             letter-spacing: 1.5px;
-            border-top: 1px solid rgba(0, 229, 204, 0.1);
+            border-top: 1px solid rgba(74, 122, 150, 0.12);
             z-index: 4;
             font-family: monospace;
-            text-shadow: 0 0 5px rgba(0, 229, 204, 0.2);
+            text-shadow: 0 0 5px rgba(45, 80, 102, 0.2);
         }
 
-        /* Vintage Boot / Diagnostic Overlay */
+        /* Vintage Boot Overlay */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 4, 6, 0.96);
+            background: rgba(13, 13, 13, 0.96);
             backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #00e5cc;
+            color: #2d5066;
             z-index: 20;
             cursor: pointer;
             text-align: center;
@@ -169,14 +169,14 @@
             font-weight: 600;
             letter-spacing: 4px;
             margin-bottom: 8px;
-            color: #00e5cc;
-            text-shadow: 0 0 10px rgba(0, 229, 204, 0.5);
+            color: #c2c2c2;
+            text-shadow: 0 0 8px rgba(194, 194, 194, 0.3);
             font-family: monospace;
         }
         #overlay p {
             font-size: 8px;
             letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.45);
+            color: rgba(194, 194, 194, 0.35);
             text-transform: uppercase;
             font-family: monospace;
         }
@@ -185,17 +185,17 @@
             display: none;
             font-family: monospace;
             font-size: 8px;
-            color: #00e5cc;
+            color: #2d5066;
             text-align: left;
             width: 240px;
             margin-top: 15px;
             line-height: 1.7;
-            text-shadow: 0 0 6px rgba(0, 229, 204, 0.4);
+            text-shadow: 0 0 6px rgba(45, 80, 102, 0.4);
         }
         .progress-bar {
             width: 100%;
             height: 3px;
-            background: rgba(0, 229, 204, 0.12);
+            background: rgba(74, 122, 150, 0.15);
             margin-top: 8px;
             position: relative;
             overflow: hidden;
@@ -203,8 +203,8 @@
         .progress-fill {
             width: 0%;
             height: 100%;
-            background: #00e5cc;
-            box-shadow: 0 0 8px #00e5cc;
+            background: #2d5066;
+            box-shadow: 0 0 8px #2d5066;
             transition: width 0.08s linear;
         }
     </style>
@@ -380,7 +380,7 @@
                 const highBoost = 1 + (i * 0.08);
                 const targetHeight = (Math.min(255, rawValue * highBoost) / 255) * maxHeight;
 
-                // Physics (Analog Smooth Drop)
+                // Physics (Analog Drop)
                 if (targetHeight > currentHeights[i]) {
                     currentHeights[i] = targetHeight;
                 } else {
@@ -402,46 +402,50 @@
 
                 const activeSegments = Math.floor(currentHeights[i] / (blockHeight + blockGap));
 
-                // 1. Unlit Ghost Grid (Vintage Smoked Glass VFD Segments)
-                ctx.fillStyle = 'rgba(0, 229, 204, 0.035)';
+                // 1. Unlit Ghost Grid (Plum/Dark Slate Unlit Segments)
+                ctx.fillStyle = 'rgba(46, 24, 37, 0.35)';
                 for (let seg = 0; seg < maxSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
-                // 2. Active Illuminated VFD Segments (Sony Dream Machine Palette)
+                // 2. Active Illuminated VFD Segments (Darkened Palette)
                 for (let seg = 0; seg < activeSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     const ratio = seg / maxSegments;
 
                     if (ratio < 0.40) {
-                        // Base / Mid Level: Deep Smoked Teal-Aqua
-                        ctx.fillStyle = '#00cbb4'; 
-                        ctx.shadowColor = 'rgba(0, 203, 180, 0.45)';
-                    } else if (ratio < 0.70) {
-                        // Mid-High Level: Pure VFD Cyan
-                        ctx.fillStyle = '#00f0d4'; 
-                        ctx.shadowColor = 'rgba(0, 240, 212, 0.55)';
-                    } else if (ratio < 0.88) {
-                        // Warm Threshold: Sony Golden Amber
-                        ctx.fillStyle = '#ffaa00'; 
-                        ctx.shadowColor = 'rgba(255, 170, 0, 0.65)';
+                        // Toned down #4a7a96 -> Slate Blue
+                        ctx.fillStyle = '#2d5066'; 
+                        ctx.shadowColor = 'rgba(45, 80, 102, 0.4)';
+                    } else if (ratio < 0.65) {
+                        // Toned down #333f58 -> Deep Navy Blue
+                        ctx.fillStyle = '#1e2738'; 
+                        ctx.shadowColor = 'rgba(30, 39, 56, 0.5)';
+                    } else if (ratio < 0.82) {
+                        // Toned down #cf7862 -> Terracotta
+                        ctx.fillStyle = '#8f4d3c'; 
+                        ctx.shadowColor = 'rgba(143, 77, 60, 0.55)';
+                    } else if (ratio < 0.92) {
+                        // Toned down #a75252 -> Muted Rust Red
+                        ctx.fillStyle = '#6e3030'; 
+                        ctx.shadowColor = 'rgba(110, 48, 48, 0.6)';
                     } else {
-                        // Peak / Clip: Vintage Coral Red
-                        ctx.fillStyle = '#ff453a'; 
-                        ctx.shadowColor = 'rgba(255, 69, 58, 0.75)';
+                        // Toned down #ee8695 -> Dusky Pink/Coral Red
+                        ctx.fillStyle = '#aa4b5a'; 
+                        ctx.shadowColor = 'rgba(170, 75, 90, 0.7)';
                     }
 
-                    ctx.shadowBlur = 4;
+                    ctx.shadowBlur = 3;
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
                 // 3. Floating Peak Indicator Line
                 if (peakHeights[i] > 2) {
                     const peakY = canvas.height - 4 - peakHeights[i];
-                    ctx.fillStyle = '#e6ffff';
-                    ctx.shadowColor = '#00f0d4';
-                    ctx.shadowBlur = 6;
+                    ctx.fillStyle = '#c2c2c2';
+                    ctx.shadowColor = '#aa4b5a';
+                    ctx.shadowBlur = 5;
                     ctx.fillRect(x, peakY, barWidth, 2);
                 }
 
