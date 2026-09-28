@@ -16,7 +16,7 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background-color: #0e0d0e;
+            background-color: #080708;
             font-family: -apple-system, "SF Pro Text", "Consolas", monospace;
             overflow: hidden;
             display: flex;
@@ -24,51 +24,75 @@
             align-items: center;
         }
 
-        /* Enclosure Chassis */
+        /* Enclosure Chassis Frame */
         .vfd-container {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background: radial-gradient(circle at center, #181618 0%, #100f11 80%, #0a090a 100%);
+            background: radial-gradient(circle at center, #161416 0%, #0d0c0e 85%, #070607 100%);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             overflow: hidden;
+            gap: 10px;
             padding-top: max(14px, env(safe-area-inset-top));
             padding-bottom: max(14px, env(safe-area-inset-bottom));
-            padding-left: max(16px, env(safe-area-inset-left));
-            padding-right: max(16px, env(safe-area-inset-right));
+            padding-left: max(14px, env(safe-area-inset-left));
+            padding-right: max(14px, env(safe-area-inset-right));
         }
 
-        /* Soft Glass Scanline Overlay */
+        /* Scanline Overlay Across All Bays */
         .vfd-container::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: 
                 linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.45) 50%),
-                radial-gradient(circle, rgba(238, 134, 149, 0.03) 1px, transparent 1px);
+                radial-gradient(circle, rgba(238, 134, 149, 0.02) 1px, transparent 1px);
             background-size: 100% 3px, 4px 4px;
             z-index: 6;
             pointer-events: none;
-            opacity: 0.8;
+            opacity: 0.85;
         }
 
-        /* Minimal Header */
+        /* Top Faceplate Modular Header Frame */
         .vfd-header {
-            height: 24px;
+            height: 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 4px;
+            gap: 10px;
             z-index: 4;
         }
 
+        /* Recessed Modular Bays (Name Bay, Clock Bay, Visualizer Bay) */
+        .faceplate-bay {
+            background: #09080a;
+            border: 1px solid rgba(119, 58, 77, 0.22);
+            border-top-color: rgba(0, 0, 0, 0.8);
+            border-left-color: rgba(0, 0, 0, 0.8);
+            border-radius: 3px;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .name-bay {
+            height: 100%;
+            flex: 0 1 auto;
+        }
+
+        .clock-bay {
+            height: 100%;
+            flex: 0 0 auto;
+        }
+
         .device-name {
-            font-size: 10px;
+            font-size: 9px;
             letter-spacing: 2px;
-            color: rgba(238, 134, 149, 0.5);
+            color: rgba(238, 134, 149, 0.55);
             font-weight: 400;
             text-transform: lowercase;
         }
@@ -76,20 +100,20 @@
         .time-display {
             font-size: 9px;
             letter-spacing: 1.5px;
-            color: rgba(207, 120, 98, 0.4);
+            color: rgba(207, 120, 98, 0.45);
             font-family: monospace;
         }
 
-        /* Canvas Viewport */
+        /* Visualizer Main Bay Frame */
         .vis-container {
             flex: 1;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding: 8px 0;
             z-index: 2;
             overflow: hidden;
+            padding: 4px;
         }
 
         canvas {
@@ -100,11 +124,11 @@
             height: 100%;
         }
 
-        /* Minimal Boot Overlay */
+        /* Overlay */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(14, 13, 14, 0.96);
+            background: rgba(13, 12, 14, 0.96);
             backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
@@ -168,20 +192,23 @@
             </div>
             
             <div class="boot-seq" id="boot-seq">
-                <div>&gt; connecting audio stream...</div>
-                <div>&gt; loading dsp matrix...</div>
+                <div id="status-line">&gt; awaiting mic approval...</div>
                 <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
             </div>
         </div>
 
-        <!-- Top Header -->
+        <!-- Header with Segmented Faceplate Bays -->
         <div class="vfd-header">
-            <div class="device-name">aethelgard lx-12</div>
-            <div class="time-display" id="time-display">00:00:00</div>
+            <div class="faceplate-bay name-bay">
+                <div class="device-name">aethelgard lx-12</div>
+            </div>
+            <div class="faceplate-bay clock-bay">
+                <div class="time-display" id="time-display">00:00:00</div>
+            </div>
         </div>
 
-        <!-- Spectrum Viewport -->
-        <div class="vis-container">
+        <!-- Visualizer Faceplate Bay -->
+        <div class="vis-container faceplate-bay">
             <canvas id="visCanvas"></canvas>
         </div>
     </div>
@@ -192,6 +219,7 @@
         const overlay = document.getElementById('overlay');
         const startPrompt = document.getElementById('start-prompt');
         const bootSeq = document.getElementById('boot-seq');
+        const statusLine = document.getElementById('status-line');
         const progressFill = document.getElementById('progress-fill');
         const timeEl = document.getElementById('time-display');
 
@@ -222,19 +250,8 @@
             startPrompt.style.display = 'none';
             bootSeq.style.display = 'block';
 
-            let progress = 0;
-            const bootInterval = setInterval(() => {
-                progress += 5;
-                progressFill.style.width = `${progress}%`;
-                if (progress >= 100) {
-                    clearInterval(bootInterval);
-                    finishInitialization();
-                }
-            }, 30);
-
             try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
+                // Request access first so the permission dialog appears clean
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: false,
@@ -243,7 +260,10 @@
                     }, 
                     video: false 
                 });
-                
+
+                // Once granted, trigger the smooth boot animation
+                statusLine.textContent = "> initializing audio dsp...";
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
                 microphone = audioCtx.createMediaStreamSource(stream);
                 
@@ -252,8 +272,19 @@
                 microphone.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                let progress = 0;
+                const bootInterval = setInterval(() => {
+                    progress += 6;
+                    progressFill.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(bootInterval);
+                        finishInitialization();
+                    }
+                }, 25);
+
             } catch (err) {
-                alert('Microphone access is required.');
+                alert('Microphone access is required to run the visualizer.');
                 console.error(err);
                 isBooting = false;
                 startPrompt.style.display = 'block';
@@ -281,7 +312,7 @@
             analyser.getByteFrequencyData(dataArray);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const paddingX = 12;
+            const paddingX = 8;
             const availableWidth = canvas.width - (paddingX * 2);
             const barGap = Math.max(3, Math.floor(availableWidth * 0.018));
             const barWidth = Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT);
@@ -334,36 +365,31 @@
 
                 const activeSegments = Math.floor(currentHeights[i] / (blockHeight + blockGap));
 
-                // 1. Unlit Ghost Segments (Dark Smokey Mauve)
-                ctx.fillStyle = 'rgba(84, 50, 70, 0.2)';
+                // 1. Unlit Ghost Segments
+                ctx.fillStyle = 'rgba(84, 50, 70, 0.18)';
                 for (let seg = 0; seg < maxSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
-                // 2. Active Illuminated VFD Segments (Warm Cozy Gradient)
+                // 2. Active Illuminated VFD Segments
                 for (let seg = 0; seg < activeSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     const ratio = seg / maxSegments;
 
                     if (ratio < 0.35) {
-                        // Base Level: #543246 (Deep Plum)
                         ctx.fillStyle = '#543246'; 
                         ctx.shadowColor = 'rgba(84, 50, 70, 0.3)';
                     } else if (ratio < 0.60) {
-                        // Mid-Low: #773a4d (Warm Berry / Mauve)
                         ctx.fillStyle = '#773a4d'; 
                         ctx.shadowColor = 'rgba(119, 58, 77, 0.4)';
                     } else if (ratio < 0.80) {
-                        // Mid-High: #a75252 (Muted Red)
                         ctx.fillStyle = '#a75252'; 
                         ctx.shadowColor = 'rgba(167, 82, 82, 0.45)';
                     } else if (ratio < 0.92) {
-                        // Upper: #cf7862 (Terracotta)
                         ctx.fillStyle = '#cf7862'; 
                         ctx.shadowColor = 'rgba(207, 120, 98, 0.5)';
                     } else {
-                        // Peak: #ee8695 (Soft Dusky Rose)
                         ctx.fillStyle = '#ee8695'; 
                         ctx.shadowColor = 'rgba(238, 134, 149, 0.6)';
                     }
