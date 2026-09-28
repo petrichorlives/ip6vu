@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>aethelgard lx-12</title>
+    <title>Aethelgard Audio Works</title>
     <style>
         * {
             box-sizing: border-box;
@@ -42,7 +42,7 @@
             padding-right: max(14px, env(safe-area-inset-right));
         }
 
-        /* Scanline Mesh Overlay */
+        /* Scanline Overlay */
         .vfd-container::before {
             content: "";
             position: absolute;
@@ -56,7 +56,7 @@
             opacity: 0.85;
         }
 
-        /* Top Faceplate Modular Header Frame */
+        /* Top Faceplate Header Frame */
         .vfd-header {
             height: 32px;
             display: flex;
@@ -93,8 +93,8 @@
             font-size: 9px;
             letter-spacing: 2px;
             color: rgba(238, 134, 149, 0.55);
-            font-weight: 400;
-            text-transform: lowercase;
+            font-weight: 500;
+            text-transform: uppercase;
         }
 
         .time-display {
@@ -104,7 +104,7 @@
             font-family: monospace;
         }
 
-        /* Visualizer Main Bay Frame */
+        /* Visualizer Main Bay */
         .vis-container {
             flex: 1;
             position: relative;
@@ -124,18 +124,18 @@
             height: 100%;
         }
 
-        /* --- Minimal Broadcast Overlay --- */
+        /* --- 80s Corporate Tech Startup Overlay --- */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #0a090b;
+            background: #09080a;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
             z-index: 20;
             cursor: pointer;
-            padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+            padding: max(28px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
         }
 
         .center-branding {
@@ -147,11 +147,11 @@
             text-align: center;
         }
 
-        /* Glowing Vector Logo Mark */
+        /* 80s Geometric Logo Icon */
         .logo-mark {
-            width: 82px;
-            height: 82px;
-            margin-bottom: 22px;
+            width: 110px;
+            height: 70px;
+            margin-bottom: 24px;
             position: relative;
             display: flex;
             justify-content: center;
@@ -161,65 +161,70 @@
         .logo-mark svg {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 0 12px rgba(238, 134, 149, 0.45));
+            filter: drop-shadow(0 0 10px rgba(238, 134, 149, 0.35));
         }
 
-        /* Lined Broadcast Style Nameplate */
+        /* Corporate Title Header */
         .brand-title {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: 6px;
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 8px;
             color: #ee8695;
             text-transform: uppercase;
             background: linear-gradient(180deg, #ee8695 0%, #cf7862 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(238, 134, 149, 0.3);
-            margin-bottom: 4px;
+            text-shadow: 0 0 18px rgba(238, 134, 149, 0.25);
+            margin-bottom: 6px;
             position: relative;
         }
 
         .brand-subtitle {
             font-size: 10px;
-            letter-spacing: 5px;
-            color: rgba(207, 120, 98, 0.7);
+            letter-spacing: 7px;
+            color: rgba(207, 120, 98, 0.75);
             text-transform: uppercase;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-top: 1px solid rgba(119, 58, 77, 0.3);
+            border-bottom: 1px solid rgba(119, 58, 77, 0.3);
+            padding: 3px 0;
+            width: 100%;
+            max-width: 280px;
         }
 
         .brand-copyright {
             font-size: 8px;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             color: rgba(119, 58, 77, 0.6);
             font-family: monospace;
         }
 
         .start-prompt {
-            margin-top: 24px;
+            margin-top: 28px;
             font-size: 9px;
-            letter-spacing: 2px;
-            color: rgba(238, 134, 149, 0.5);
+            letter-spacing: 2.5px;
+            color: rgba(238, 134, 149, 0.55);
             text-transform: uppercase;
             animation: pulse-glow 2s infinite ease-in-out;
         }
 
         @keyframes pulse-glow {
             0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
+            50% { opacity: 0.85; }
         }
 
-        /* Bottom Readout Status Bar */
+        /* Bottom Status Housing & Thicker Loading Bar */
         .status-bar-container {
             width: 100%;
-            background: rgba(15, 13, 16, 0.85);
-            border: 1px solid rgba(119, 58, 77, 0.25);
+            background: rgba(14, 12, 15, 0.9);
+            border: 1px solid rgba(119, 58, 77, 0.3);
             border-radius: 4px;
-            padding: 10px 14px;
+            padding: 12px 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            gap: 10px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0,0,0,0.5);
         }
 
         .status-readouts {
@@ -227,30 +232,32 @@
             justify-content: space-between;
             align-items: center;
             font-family: monospace;
-            font-size: 8px;
+            font-size: 8.5px;
             letter-spacing: 1.5px;
-            color: rgba(207, 120, 98, 0.75);
+            color: rgba(207, 120, 98, 0.8);
             text-transform: uppercase;
         }
 
         .status-readouts span {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
 
         .status-indicator {
-            width: 4px;
-            height: 4px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             background: #ee8695;
             box-shadow: 0 0 6px #ee8695;
         }
 
+        /* Thicker Loading Bar */
         .boot-progress-bar {
             width: 100%;
-            height: 3px;
-            background: rgba(84, 50, 70, 0.3);
+            height: 6px;
+            background: rgba(50, 30, 42, 0.6);
+            border: 1px solid rgba(119, 58, 77, 0.2);
             border-radius: 2px;
             overflow: hidden;
             position: relative;
@@ -259,8 +266,8 @@
         .boot-progress-fill {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #773a4d 0%, #cf7862 70%, #ee8695 100%);
-            box-shadow: 0 0 8px rgba(238, 134, 149, 0.6);
+            background: linear-gradient(90deg, #543246 0%, #773a4d 40%, #cf7862 75%, #ee8695 100%);
+            box-shadow: 0 0 10px rgba(238, 134, 149, 0.7);
             transition: width 0.1s linear;
         }
     </style>
@@ -272,30 +279,37 @@
         <!-- Startup Screen Overlay -->
         <div id="overlay">
             <div class="center-branding">
-                <!-- Globe Logo Mark -->
+                
+                <!-- 80s Tech Crest Logo Mark -->
                 <div class="logo-mark">
-                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="44" stroke="#773a4d" stroke-width="1.5" stroke-dasharray="2 2" />
-                        <ellipse cx="50" cy="50" rx="44" ry="18" stroke="#cf7862" stroke-width="1.5" />
-                        <ellipse cx="50" cy="50" rx="44" ry="32" stroke="#ee8695" stroke-width="1.2" />
-                        <ellipse cx="50" cy="50" rx="18" ry="44" stroke="#cf7862" stroke-width="1.5" />
-                        <line x1="6" y1="50" x2="94" y2="50" stroke="#ee8695" stroke-width="1.5" />
-                        <line x1="50" y1="6" x2="50" y2="94" stroke="#ee8695" stroke-width="1.5" />
+                    <svg viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Parallel Slashes -->
+                        <path d="M10 60 L35 10 H45 L20 60 Z" fill="#773a4d" />
+                        <path d="M25 60 L50 10 H60 L35 60 Z" fill="#a75252" />
+                        <path d="M40 60 L65 10 H75 L50 60 Z" fill="#cf7862" />
+                        
+                        <!-- Segmented 'A' Chevron Wings -->
+                        <path d="M60 10 L105 10 L85 30 L60 30 Z" fill="#ee8695" />
+                        <path d="M60 35 L80 35 L68 47 L60 47 Z" fill="#cf7862" />
+                        <path d="M60 52 L95 52 L87 60 L60 60 Z" fill="#773a4d" />
+                        
+                        <!-- Base Accent Line -->
+                        <rect x="10" y="64" width="95" height="2" fill="#ee8695" opacity="0.6" />
                     </svg>
                 </div>
 
-                <div class="brand-title">aethelgard</div>
-                <div class="brand-subtitle">lx-12 audio system</div>
-                <div class="brand-copyright">© AETHELGARD DSP LABS 2026</div>
+                <div class="brand-title">Aethelgard</div>
+                <div class="brand-subtitle">Audio Works</div>
+                <div class="brand-copyright">SYSTEM ARCHITECTURE // MODEL LX-12</div>
 
-                <div class="start-prompt" id="start-prompt">[ tap screen to initialize ]</div>
+                <div class="start-prompt" id="start-prompt">[ tap to power on ]</div>
             </div>
 
             <!-- Bottom Status Readout Bar -->
             <div class="status-bar-container">
                 <div class="status-readouts">
-                    <span><i class="status-indicator"></i><span id="sys-status">SYS_IDLE</span></span>
-                    <span id="status-line">AWAITING INPUT</span>
+                    <span><i class="status-indicator"></i><span id="sys-status">SYS_OFF</span></span>
+                    <span id="status-line">READY TO INITIALIZE</span>
                     <span id="pct-display">00%</span>
                 </div>
                 <div class="boot-progress-bar">
@@ -307,7 +321,7 @@
         <!-- Visualizer Header -->
         <div class="vfd-header">
             <div class="faceplate-bay name-bay">
-                <div class="device-name">aethelgard lx-12</div>
+                <div class="device-name">Aethelgard Audio Works</div>
             </div>
             <div class="faceplate-bay clock-bay">
                 <div class="time-display" id="time-display">00:00:00</div>
@@ -381,9 +395,9 @@
 
                 // Multi-stage status sequence
                 const bootSteps = [
-                    { pct: 20, text: "STREAM_INIT" },
+                    { pct: 20, text: "BUS_INITIALIZING" },
                     { pct: 45, text: "CALIBRATING_DSP" },
-                    { pct: 75, text: "GRID_SYNC_OK" },
+                    { pct: 75, text: "ANALOG_LOCK_OK" },
                     { pct: 100, text: "SYSTEM_ONLINE" }
                 ];
 
@@ -411,8 +425,8 @@
                 console.error(err);
                 isBooting = false;
                 startPrompt.style.display = 'block';
-                sysStatus.textContent = "SYS_IDLE";
-                statusLine.textContent = "AWAITING INPUT";
+                sysStatus.textContent = "SYS_OFF";
+                statusLine.textContent = "READY TO INITIALIZE";
             }
         });
 
