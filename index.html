@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AETHELGARD VFD DSP // 12-BAND ANALYZER</title>
+    <title>aethelgard lx-12</title>
     <style>
         * {
             box-sizing: border-box;
@@ -16,98 +16,67 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background-color: #080808;
-            font-family: -apple-system, "SF Pro Display", "Courier New", monospace;
+            background-color: #0e0d0e;
+            font-family: -apple-system, "SF Pro Text", "Consolas", monospace;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Hardware Component Chassis / Bezel */
-        .cyber-bezel {
+        /* Enclosure Chassis */
+        .vfd-container {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background: radial-gradient(circle at center, #191a21 0%, #111216 75%, #0d0d0d 100%);
-            border: 1px solid rgba(74, 122, 150, 0.15);
+            background: radial-gradient(circle at center, #181618 0%, #100f11 80%, #0a090a 100%);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.98);
-            padding-top: max(12px, env(safe-area-inset-top));
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-            padding-left: max(14px, env(safe-area-inset-left));
-            padding-right: max(14px, env(safe-area-inset-right));
+            padding-top: max(14px, env(safe-area-inset-top));
+            padding-bottom: max(14px, env(safe-area-inset-bottom));
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
         }
 
-        /* Glass Reflection Line + VFD Mesh Overlay */
-        .cyber-bezel::before {
+        /* Soft Glass Scanline Overlay */
+        .vfd-container::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: 
-                linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.25) 100%),
-                linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.55) 50%),
-                radial-gradient(circle, rgba(74, 122, 150, 0.05) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 3px, 3px 3px;
+                linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.45) 50%),
+                radial-gradient(circle, rgba(238, 134, 149, 0.03) 1px, transparent 1px);
+            background-size: 100% 3px, 4px 4px;
             z-index: 6;
             pointer-events: none;
-            opacity: 0.9;
+            opacity: 0.8;
         }
 
-        /* 80s Cassette Technical Markings */
-        .corner-tag {
-            position: absolute;
-            font-size: 8px;
-            letter-spacing: 1.5px;
-            color: rgba(194, 194, 194, 0.25);
-            z-index: 5;
-            text-transform: uppercase;
-            font-family: monospace;
-        }
-        .tag-tl { top: max(6px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); }
-        .tag-tr { top: max(6px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); }
-        .tag-bl { bottom: max(6px, env(safe-area-inset-bottom)); left: max(14px, env(safe-area-inset-left)); }
-        .tag-br { bottom: max(6px, env(safe-area-inset-bottom)); right: max(14px, env(safe-area-inset-right)); }
-
-        /* VFD Top HUD Header */
-        .hud-header {
-            height: 28px;
+        /* Minimal Header */
+        .vfd-header {
+            height: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 4px;
-            margin-top: 8px;
-            color: #2d5066;
-            font-size: 9px;
-            letter-spacing: 2px;
-            border-bottom: 1px solid rgba(74, 122, 150, 0.15);
             z-index: 4;
-            text-shadow: 0 0 6px rgba(45, 80, 102, 0.4);
         }
 
-        .corp-logo {
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            color: #c2c2c2;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .corp-logo::before {
-            content: "■";
-            font-size: 7px;
-            color: #aa4b5a;
+        .device-name {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: rgba(238, 134, 149, 0.5);
+            font-weight: 400;
+            text-transform: lowercase;
         }
 
-        .hud-metrics {
-            display: flex;
-            gap: 12px;
-            color: rgba(194, 194, 194, 0.4);
-            font-size: 8px;
+        .time-display {
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: rgba(207, 120, 98, 0.4);
             font-family: monospace;
         }
 
@@ -118,7 +87,7 @@
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding: 4px 0;
+            padding: 8px 0;
             z-index: 2;
             overflow: hidden;
         }
@@ -131,71 +100,51 @@
             height: 100%;
         }
 
-        /* VFD Bottom Status Footer */
-        .hud-footer {
-            height: 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 4px;
-            margin-bottom: 6px;
-            color: rgba(194, 194, 194, 0.3);
-            font-size: 8px;
-            letter-spacing: 1.5px;
-            border-top: 1px solid rgba(74, 122, 150, 0.12);
-            z-index: 4;
-            font-family: monospace;
-            text-shadow: 0 0 5px rgba(45, 80, 102, 0.2);
-        }
-
-        /* Vintage Boot Overlay */
+        /* Minimal Boot Overlay */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(13, 13, 13, 0.96);
-            backdrop-filter: blur(12px);
+            background: rgba(14, 13, 14, 0.96);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #2d5066;
+            color: rgba(238, 134, 149, 0.6);
             z-index: 20;
             cursor: pointer;
             text-align: center;
             padding: 20px;
         }
         #overlay h1 {
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 4px;
-            margin-bottom: 8px;
-            color: #c2c2c2;
-            text-shadow: 0 0 8px rgba(194, 194, 194, 0.3);
-            font-family: monospace;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            color: rgba(238, 134, 149, 0.7);
+            text-transform: lowercase;
         }
         #overlay p {
             font-size: 8px;
             letter-spacing: 2px;
-            color: rgba(194, 194, 194, 0.35);
+            color: rgba(255, 255, 255, 0.3);
             text-transform: uppercase;
-            font-family: monospace;
         }
 
         .boot-seq {
             display: none;
             font-family: monospace;
             font-size: 8px;
-            color: #2d5066;
+            color: rgba(207, 120, 98, 0.6);
             text-align: left;
-            width: 240px;
+            width: 200px;
             margin-top: 15px;
-            line-height: 1.7;
-            text-shadow: 0 0 6px rgba(45, 80, 102, 0.4);
+            line-height: 1.6;
         }
         .progress-bar {
             width: 100%;
-            height: 3px;
-            background: rgba(74, 122, 150, 0.15);
+            height: 2px;
+            background: rgba(119, 58, 77, 0.3);
             margin-top: 8px;
             position: relative;
             overflow: hidden;
@@ -203,54 +152,37 @@
         .progress-fill {
             width: 0%;
             height: 100%;
-            background: #2d5066;
-            box-shadow: 0 0 8px #2d5066;
+            background: #cf7862;
             transition: width 0.08s linear;
         }
     </style>
 </head>
 <body>
 
-    <div class="cyber-bezel">
-        <div class="corner-tag tag-tl">SYS//06S</div>
-        <div class="corner-tag tag-tr">LXS-800</div>
-        <div class="corner-tag tag-bl">SEC//OK</div>
-        <div class="corner-tag tag-br">AETH.CORP</div>
-
+    <div class="vfd-container">
         <!-- Initializer Overlay -->
         <div id="overlay">
             <div id="start-prompt">
-                <h1>AETHELGARD VFD DSP</h1>
-                <p>[ TAP SCREEN TO ENGAGE SYSTEM ]</p>
+                <h1>aethelgard lx-12</h1>
+                <p>[ tap to initialize ]</p>
             </div>
             
             <div class="boot-seq" id="boot-seq">
-                <div>&gt; POWER_ON // VFD_GRID_INIT</div>
-                <div>&gt; DSP_CORE v2.04 ONLINE</div>
-                <div>&gt; MIC_ARRAY CALIBRATED</div>
+                <div>&gt; connecting audio stream...</div>
+                <div>&gt; loading dsp matrix...</div>
                 <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
             </div>
         </div>
 
         <!-- Top Header -->
-        <div class="hud-header">
-            <div class="corp-logo">AETHELGARD // LX-12</div>
-            <div class="hud-metrics">
-                <span>FREQ: 20Hz - 20kHz</span>
-                <span id="time-display">00:00:00</span>
-            </div>
+        <div class="vfd-header">
+            <div class="device-name">aethelgard lx-12</div>
+            <div class="time-display" id="time-display">00:00:00</div>
         </div>
 
         <!-- Spectrum Viewport -->
         <div class="vis-container">
             <canvas id="visCanvas"></canvas>
-        </div>
-
-        <!-- Status Footer -->
-        <div class="hud-footer">
-            <span>MIC_INPUT: RAW_DIRECT</span>
-            <span>DECAY: GRAVITY_SMOOTH</span>
-            <span>GAIN: DYNAMIC</span>
         </div>
     </div>
 
@@ -292,7 +224,7 @@
 
             let progress = 0;
             const bootInterval = setInterval(() => {
-                progress += 4;
+                progress += 5;
                 progressFill.style.width = `${progress}%`;
                 if (progress >= 100) {
                     clearInterval(bootInterval);
@@ -316,7 +248,7 @@
                 microphone = audioCtx.createMediaStreamSource(stream);
                 
                 analyser.fftSize = 512; 
-                analyser.smoothingTimeConstant = 0.18; 
+                analyser.smoothingTimeConstant = 0.2; 
                 microphone.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -349,13 +281,13 @@
             analyser.getByteFrequencyData(dataArray);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const paddingX = 10;
+            const paddingX = 12;
             const availableWidth = canvas.width - (paddingX * 2);
             const barGap = Math.max(3, Math.floor(availableWidth * 0.018));
             const barWidth = Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT);
             let x = paddingX;
 
-            const maxHeight = canvas.height - 10;
+            const maxHeight = canvas.height - 8;
             const nyquist = audioCtx.sampleRate / 2;
 
             const blockHeight = 4;
@@ -380,11 +312,11 @@
                 const highBoost = 1 + (i * 0.08);
                 const targetHeight = (Math.min(255, rawValue * highBoost) / 255) * maxHeight;
 
-                // Physics (Analog Drop)
+                // Physics (Soft Drop)
                 if (targetHeight > currentHeights[i]) {
                     currentHeights[i] = targetHeight;
                 } else {
-                    currentHeights[i] -= 2.2;
+                    currentHeights[i] -= 2.0;
                     if (currentHeights[i] < 0) currentHeights[i] = 0;
                 }
 
@@ -395,57 +327,57 @@
                     if (peakHoldTimers[i] > 0) {
                         peakHoldTimers[i]--;
                     } else {
-                        peakHeights[i] -= 1.0;
+                        peakHeights[i] -= 0.8;
                         if (peakHeights[i] < 0) peakHeights[i] = 0;
                     }
                 }
 
                 const activeSegments = Math.floor(currentHeights[i] / (blockHeight + blockGap));
 
-                // 1. Unlit Ghost Grid (Plum/Dark Slate Unlit Segments)
-                ctx.fillStyle = 'rgba(46, 24, 37, 0.35)';
+                // 1. Unlit Ghost Segments (Dark Smokey Mauve)
+                ctx.fillStyle = 'rgba(84, 50, 70, 0.2)';
                 for (let seg = 0; seg < maxSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
-                // 2. Active Illuminated VFD Segments (Darkened Palette)
+                // 2. Active Illuminated VFD Segments (Warm Cozy Gradient)
                 for (let seg = 0; seg < activeSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     const ratio = seg / maxSegments;
 
-                    if (ratio < 0.40) {
-                        // Toned down #4a7a96 -> Slate Blue
-                        ctx.fillStyle = '#2d5066'; 
-                        ctx.shadowColor = 'rgba(45, 80, 102, 0.4)';
-                    } else if (ratio < 0.65) {
-                        // Toned down #333f58 -> Deep Navy Blue
-                        ctx.fillStyle = '#1e2738'; 
-                        ctx.shadowColor = 'rgba(30, 39, 56, 0.5)';
-                    } else if (ratio < 0.82) {
-                        // Toned down #cf7862 -> Terracotta
-                        ctx.fillStyle = '#8f4d3c'; 
-                        ctx.shadowColor = 'rgba(143, 77, 60, 0.55)';
+                    if (ratio < 0.35) {
+                        // Base Level: #543246 (Deep Plum)
+                        ctx.fillStyle = '#543246'; 
+                        ctx.shadowColor = 'rgba(84, 50, 70, 0.3)';
+                    } else if (ratio < 0.60) {
+                        // Mid-Low: #773a4d (Warm Berry / Mauve)
+                        ctx.fillStyle = '#773a4d'; 
+                        ctx.shadowColor = 'rgba(119, 58, 77, 0.4)';
+                    } else if (ratio < 0.80) {
+                        // Mid-High: #a75252 (Muted Red)
+                        ctx.fillStyle = '#a75252'; 
+                        ctx.shadowColor = 'rgba(167, 82, 82, 0.45)';
                     } else if (ratio < 0.92) {
-                        // Toned down #a75252 -> Muted Rust Red
-                        ctx.fillStyle = '#6e3030'; 
-                        ctx.shadowColor = 'rgba(110, 48, 48, 0.6)';
+                        // Upper: #cf7862 (Terracotta)
+                        ctx.fillStyle = '#cf7862'; 
+                        ctx.shadowColor = 'rgba(207, 120, 98, 0.5)';
                     } else {
-                        // Toned down #ee8695 -> Dusky Pink/Coral Red
-                        ctx.fillStyle = '#aa4b5a'; 
-                        ctx.shadowColor = 'rgba(170, 75, 90, 0.7)';
+                        // Peak: #ee8695 (Soft Dusky Rose)
+                        ctx.fillStyle = '#ee8695'; 
+                        ctx.shadowColor = 'rgba(238, 134, 149, 0.6)';
                     }
 
                     ctx.shadowBlur = 3;
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
-                // 3. Floating Peak Indicator Line
+                // 3. Floating Peak Cap
                 if (peakHeights[i] > 2) {
                     const peakY = canvas.height - 4 - peakHeights[i];
-                    ctx.fillStyle = '#c2c2c2';
-                    ctx.shadowColor = '#aa4b5a';
-                    ctx.shadowBlur = 5;
+                    ctx.fillStyle = '#ee8695';
+                    ctx.shadowColor = '#ee8695';
+                    ctx.shadowBlur = 4;
                     ctx.fillRect(x, peakY, barWidth, 2);
                 }
 
