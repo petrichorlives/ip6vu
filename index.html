@@ -16,99 +16,102 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background-color: #020305;
-            font-family: -apple-system, "SF Pro Display", "Consolas", monospace;
+            background-color: #010203;
+            font-family: -apple-system, "SF Pro Display", "Courier New", monospace;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Outer Frame / Bezel Enclosure */
+        /* Hardware Component Chassis / Bezel */
         .cyber-bezel {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background: radial-gradient(circle at center, #080a10 0%, #010204 100%);
-            border: 1px solid rgba(0, 255, 204, 0.2);
+            background: radial-gradient(circle at center, #070d12 0%, #020406 85%, #000000 100%);
+            border: 1px solid rgba(0, 229, 204, 0.12);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.95);
-            padding-top: max(10px, env(safe-area-inset-top));
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
-            padding-left: max(12px, env(safe-area-inset-left));
-            padding-right: max(12px, env(safe-area-inset-right));
+            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.98);
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            padding-left: max(14px, env(safe-area-inset-left));
+            padding-right: max(14px, env(safe-area-inset-right));
         }
 
-        /* VFD Glass Scanline & Mesh Texture Overlay */
+        /* Glass Reflection Line + VFD Phosphor Mesh Overlay */
         .cyber-bezel::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: 
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%),
-                radial-gradient(circle, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
-            background-size: 100% 3px, 4px 4px;
+                linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.2) 100%),
+                linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 50%),
+                radial-gradient(circle, rgba(0, 229, 204, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 3px, 3px 3px;
             z-index: 6;
             pointer-events: none;
-            opacity: 0.85;
+            opacity: 0.9;
         }
 
-        /* Corner Tags */
+        /* 80s Cassette / Hi-Fi Corner Technical Markings */
         .corner-tag {
             position: absolute;
             font-size: 8px;
             letter-spacing: 1.5px;
-            color: rgba(0, 255, 204, 0.35);
+            color: rgba(0, 229, 204, 0.3);
             z-index: 5;
             text-transform: uppercase;
+            font-family: monospace;
         }
-        .tag-tl { top: max(6px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); }
-        .tag-tr { top: max(6px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
-        .tag-bl { bottom: max(6px, env(safe-area-inset-bottom)); left: max(12px, env(safe-area-inset-left)); }
-        .tag-br { bottom: max(6px, env(safe-area-inset-bottom)); right: max(12px, env(safe-area-inset-right)); }
+        .tag-tl { top: max(6px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); }
+        .tag-tr { top: max(6px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); }
+        .tag-bl { bottom: max(6px, env(safe-area-inset-bottom)); left: max(14px, env(safe-area-inset-left)); }
+        .tag-br { bottom: max(6px, env(safe-area-inset-bottom)); right: max(14px, env(safe-area-inset-right)); }
 
-        /* HUD Header */
+        /* VFD Top HUD Header */
         .hud-header {
             height: 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 8px;
-            margin-top: 10px;
-            color: #00ffcc;
-            font-size: 10px;
+            padding: 0 4px;
+            margin-top: 8px;
+            color: #00e5cc;
+            font-size: 9px;
             letter-spacing: 2px;
-            border-bottom: 1px solid rgba(0, 255, 204, 0.15);
+            border-bottom: 1px solid rgba(0, 229, 204, 0.12);
             z-index: 4;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+            text-shadow: 0 0 6px rgba(0, 229, 204, 0.4);
         }
 
         .corp-logo {
             font-weight: 700;
             letter-spacing: 2.5px;
-            color: #a3f7bf;
+            color: #80f0df;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         .corp-logo::before {
-            content: "◆";
-            font-size: 8px;
+            content: "■";
+            font-size: 7px;
             color: #ffaa00;
         }
 
         .hud-metrics {
             display: flex;
             gap: 12px;
-            color: rgba(0, 255, 204, 0.6);
-            font-size: 9px;
+            color: rgba(0, 229, 204, 0.55);
+            font-size: 8px;
+            font-family: monospace;
         }
 
-        /* Canvas Container */
+        /* Canvas Viewport */
         .vis-container {
             flex: 1;
             position: relative;
@@ -128,78 +131,80 @@
             height: 100%;
         }
 
-        /* HUD Footer */
+        /* VFD Bottom Status Footer */
         .hud-footer {
             height: 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 8px;
-            margin-bottom: 8px;
-            color: rgba(0, 255, 204, 0.4);
+            padding: 0 4px;
+            margin-bottom: 6px;
+            color: rgba(0, 229, 204, 0.35);
             font-size: 8px;
             letter-spacing: 1.5px;
-            border-top: 1px solid rgba(0, 255, 204, 0.1);
+            border-top: 1px solid rgba(0, 229, 204, 0.1);
             z-index: 4;
-            text-shadow: 0 0 6px rgba(0, 255, 204, 0.2);
+            font-family: monospace;
+            text-shadow: 0 0 5px rgba(0, 229, 204, 0.2);
         }
 
-        /* Boot / Initializer Overlay */
+        /* Vintage Boot / Diagnostic Overlay */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(1, 3, 6, 0.96);
-            backdrop-filter: blur(10px);
+            background: rgba(2, 4, 6, 0.96);
+            backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #00ffcc;
+            color: #00e5cc;
             z-index: 20;
             cursor: pointer;
             text-align: center;
             padding: 20px;
         }
         #overlay h1 {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             letter-spacing: 4px;
             margin-bottom: 8px;
-            color: #00ffcc;
-            text-shadow: 0 0 12px rgba(0, 255, 204, 0.6);
+            color: #00e5cc;
+            text-shadow: 0 0 10px rgba(0, 229, 204, 0.5);
+            font-family: monospace;
         }
         #overlay p {
-            font-size: 9px;
+            font-size: 8px;
             letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.45);
             text-transform: uppercase;
+            font-family: monospace;
         }
 
         .boot-seq {
             display: none;
             font-family: monospace;
-            font-size: 9px;
-            color: #00ffcc;
+            font-size: 8px;
+            color: #00e5cc;
             text-align: left;
-            width: 260px;
+            width: 240px;
             margin-top: 15px;
-            line-height: 1.6;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+            line-height: 1.7;
+            text-shadow: 0 0 6px rgba(0, 229, 204, 0.4);
         }
         .progress-bar {
             width: 100%;
-            height: 4px;
-            background: rgba(0, 255, 204, 0.15);
+            height: 3px;
+            background: rgba(0, 229, 204, 0.12);
             margin-top: 8px;
             position: relative;
             overflow: hidden;
-            border-radius: 2px;
         }
         .progress-fill {
             width: 0%;
             height: 100%;
-            background: #00ffcc;
-            box-shadow: 0 0 10px #00ffcc;
+            background: #00e5cc;
+            box-shadow: 0 0 8px #00e5cc;
             transition: width 0.08s linear;
         }
     </style>
@@ -220,9 +225,9 @@
             </div>
             
             <div class="boot-seq" id="boot-seq">
-                <div>&gt; INITIALIZING VFD MATRIX...</div>
-                <div>&gt; LOADING DSP CORE v2.04...</div>
-                <div>&gt; SYNCING MIC ARRAY...</div>
+                <div>&gt; POWER_ON // VFD_GRID_INIT</div>
+                <div>&gt; DSP_CORE v2.04 ONLINE</div>
+                <div>&gt; MIC_ARRAY CALIBRATED</div>
                 <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
             </div>
         </div>
@@ -311,7 +316,7 @@
                 microphone = audioCtx.createMediaStreamSource(stream);
                 
                 analyser.fftSize = 512; 
-                analyser.smoothingTimeConstant = 0.15; 
+                analyser.smoothingTimeConstant = 0.18; 
                 microphone.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -344,9 +349,9 @@
             analyser.getByteFrequencyData(dataArray);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const paddingX = 12;
+            const paddingX = 10;
             const availableWidth = canvas.width - (paddingX * 2);
-            const barGap = Math.max(4, Math.floor(availableWidth * 0.02));
+            const barGap = Math.max(3, Math.floor(availableWidth * 0.018));
             const barWidth = Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT);
             let x = paddingX;
 
@@ -372,70 +377,71 @@
                     count++;
                 }
                 const rawValue = count > 0 ? sum / count : 0;
-                const highBoost = 1 + (i * 0.1);
+                const highBoost = 1 + (i * 0.08);
                 const targetHeight = (Math.min(255, rawValue * highBoost) / 255) * maxHeight;
 
-                // Physics
+                // Physics (Analog Smooth Drop)
                 if (targetHeight > currentHeights[i]) {
                     currentHeights[i] = targetHeight;
                 } else {
-                    currentHeights[i] -= 2.4;
+                    currentHeights[i] -= 2.2;
                     if (currentHeights[i] < 0) currentHeights[i] = 0;
                 }
 
                 if (currentHeights[i] > peakHeights[i]) {
                     peakHeights[i] = currentHeights[i];
-                    peakHoldTimers[i] = 10;
+                    peakHoldTimers[i] = 12;
                 } else {
                     if (peakHoldTimers[i] > 0) {
                         peakHoldTimers[i]--;
                     } else {
-                        peakHeights[i] -= 1.2;
+                        peakHeights[i] -= 1.0;
                         if (peakHeights[i] < 0) peakHeights[i] = 0;
                     }
                 }
 
                 const activeSegments = Math.floor(currentHeights[i] / (blockHeight + blockGap));
 
-                // 1. Ghost Grid (Unlit VFD Segments)
-                ctx.fillStyle = 'rgba(0, 255, 204, 0.04)';
+                // 1. Unlit Ghost Grid (Vintage Smoked Glass VFD Segments)
+                ctx.fillStyle = 'rgba(0, 229, 204, 0.035)';
                 for (let seg = 0; seg < maxSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
-                // 2. Active Illuminated VFD Segments with Expanded Color Palette
+                // 2. Active Illuminated VFD Segments (Sony Dream Machine Palette)
                 for (let seg = 0; seg < activeSegments; seg++) {
                     const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
                     const ratio = seg / maxSegments;
 
-                    if (ratio < 0.25) {
-                        ctx.fillStyle = '#00e5a3'; // Deep Emerald / Mint
-                        ctx.shadowColor = 'rgba(0, 229, 163, 0.5)';
-                    } else if (ratio < 0.55) {
-                        ctx.fillStyle = '#00ffcc'; // Classic VFD Cyan
-                        ctx.shadowColor = 'rgba(0, 255, 204, 0.6)';
-                    } else if (ratio < 0.75) {
-                        ctx.fillStyle = '#8a5cf6'; // Electric Violet
-                        ctx.shadowColor = 'rgba(138, 92, 246, 0.6)';
-                    } else if (ratio < 0.90) {
-                        ctx.fillStyle = '#d946ef'; // Steezy Amethyst/Magenta
-                        ctx.shadowColor = 'rgba(217, 70, 239, 0.65)';
+                    if (ratio < 0.40) {
+                        // Base / Mid Level: Deep Smoked Teal-Aqua
+                        ctx.fillStyle = '#00cbb4'; 
+                        ctx.shadowColor = 'rgba(0, 203, 180, 0.45)';
+                    } else if (ratio < 0.70) {
+                        // Mid-High Level: Pure VFD Cyan
+                        ctx.fillStyle = '#00f0d4'; 
+                        ctx.shadowColor = 'rgba(0, 240, 212, 0.55)';
+                    } else if (ratio < 0.88) {
+                        // Warm Threshold: Sony Golden Amber
+                        ctx.fillStyle = '#ffaa00'; 
+                        ctx.shadowColor = 'rgba(255, 170, 0, 0.65)';
                     } else {
-                        ctx.fillStyle = '#ffaa00'; // Amber Peak Threshold
-                        ctx.shadowColor = 'rgba(255, 170, 0, 0.8)';
+                        // Peak / Clip: Vintage Coral Red
+                        ctx.fillStyle = '#ff453a'; 
+                        ctx.shadowColor = 'rgba(255, 69, 58, 0.75)';
                     }
 
-                    ctx.shadowBlur = 5;
+                    ctx.shadowBlur = 4;
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
                 // 3. Floating Peak Indicator Line
                 if (peakHeights[i] > 2) {
                     const peakY = canvas.height - 4 - peakHeights[i];
-                    ctx.fillStyle = '#ffffff';
-                    ctx.shadowColor = '#00ffcc';
-                    ctx.shadowBlur = 7;
+                    ctx.fillStyle = '#e6ffff';
+                    ctx.shadowColor = '#00f0d4';
+                    ctx.shadowBlur = 6;
                     ctx.fillRect(x, peakY, barWidth, 2);
                 }
 
