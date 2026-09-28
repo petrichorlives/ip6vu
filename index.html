@@ -201,7 +201,6 @@
             <span>GAIN: DYNAMIC</span>
         </div>
     </div>
-
     <script>
         const canvas = document.getElementById('visCanvas');
         const ctx = canvas.getContext('2d');
@@ -217,11 +216,26 @@
         let audioCtx, analyser, microphone, dataArray;
         let isInitialized = false;
 
-        // Visualizer Physics & Gravity State (12 Bars)
         const BARS_COUNT = 12;
         let currentHeights = new Array(BARS_COUNT).fill(0);
         let peakHeights = new Array(BARS_COUNT).fill(0);
         let peakHoldTimers = new Array(BARS_COUNT).fill(0);
+
+        // Custom frequency ranges (Hz) optimized for music & phone microphone response
+        const FREQ_BOUNDS = [
+            [30, 80],      // 1: Sub Bass
+            [80, 180],     // 2: Bass / Kick
+            [180, 320],    // 3: Upper Bass / Warmth
+            [320, 600],    // 4: Low Mids / Vocals
+            [600, 1000],   // 5: Midrange
+            [1000, 1800],  // 6: Upper Mids / Guitars
+            [1800, 2800],  // 7: Presence / Vocal clarity
+            [2800, 4200],  // 8: High Mids / Snare attack
+            [4200, 6000],  // 9: Treble
+            [6000, 8500],  // 10: High Treble / Cymbals
+            [8500, 12000], // 11: Air
+            [12000, 16000] // 12: Top End
+        ];
 
         overlay.addEventListener('click', async () => {
             if (isInitialized) return;
@@ -232,8 +246,9 @@
                 analyser = audioCtx.createAnalyser();
                 microphone = audioCtx.createMediaStreamSource(stream);
                 
-                analyser.fftSize = 64; 
-                analyser.smoothingTimeConstant = 0.6; // Soft hardware-style response
+                // Increased FFT size to 512 for higher frequency resolution in low end
+                analyser.fftSize = 512; 
+                analyser.smoothingTimeConstant = 0.5;
                 microphone.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -269,44 +284,64 @@
             let x = paddingX;
 
             const maxHeight = canvas.height - 30;
+            const nyquist = audioCtx.sampleRate / 2;
 
             for (let i = 0; i < BARS_COUNT; i++) {
-                // Map audio bins to 12 distinct bands
-                const binIndex = Math.floor(i * (dataArray.length / BARS_COUNT));
-                const targetHeight = (dataArray[binIndex] / 255) * maxHeight;
+                // Map custom Hz bounds to FFT dataArray indices
+                const [lowHz, highHz] = FREQ_BOUNDS[i];
+                const lowIndex = Math.floor((lowHz / nyquist) * dataArray.length);
+                const highIndex = Math.min(
+                    Math.ceil((highHz / nyquist) * dataArray.length), 
+                    dataArray.length - 1
+                );
+
+                // Calculate average energy in this specific frequency band
+                let sum = 0;
+                let count = 0;
+                for (let j = lowIndex; j <= highIndex; j++) {
+                    sum += dataArray[j];
+                    count++;
+                }
+                const rawValue = count > 0 ? sum / count : 0;
+
+                // Frequency curve boost (high frequencies need slight artificial boost for mic sensitivity)
+                const highBoost = 1 + (i * 0.12);
+                const boostedValue = Math.min(255, rawValue * highBoost);
+
+                const targetHeight = (boostedValue / 255) * maxHeight;
 
                 // --- Smooth Bar Decay Physics ---
                 if (targetHeight > currentHeights[i]) {
-                    currentHeights[i] = targetHeight; // Instant rise on impact
+                    currentHeights[i] = targetHeight;
                 } else {
-                    currentHeights[i] -= 2.8; // Smooth, luxurious fall rate
+                    currentHeights[i] -= 2.8;
                     if (currentHeights[i] < 0) currentHeights[i] = 0;
                 }
 
                 // --- Peak Cap Decay Physics ---
                 if (currentHeights[i] > peakHeights[i]) {
                     peakHeights[i] = currentHeights[i];
-                    peakHoldTimers[i] = 12; // Hold peak floating briefly
+                    peakHoldTimers[i] = 12;
                 } else {
                     if (peakHoldTimers[i] > 0) {
                         peakHoldTimers[i]--;
                     } else {
-                        peakHeights[i] -= 1.2; // Floating peak falls with subtle gravity
+                        peakHeights[i] -= 1.2;
                         if (peakHeights[i] < 0) peakHeights[i] = 0;
                     }
                 }
 
                 const h = currentHeights[i];
 
-                // Luxury Corporate Color Palette: Champagne Gold -> Muted Amethyst -> Soft Cyan
+                // Luxury Corporate Color Palette
                 const gradient = ctx.createLinearGradient(0, canvas.height - 10, 0, canvas.height - 10 - maxHeight);
-                gradient.addColorStop(0.0, 'rgba(212, 175, 55, 0.85)');  /* Gold */
-                gradient.addColorStop(0.55, 'rgba(168, 85, 247, 0.75)'); /* Amethyst */
-                gradient.addColorStop(1.0, 'rgba(56, 189, 248, 0.9)');   /* Cyan */
+                gradient.addColorStop(0.0, 'rgba(212, 175, 55, 0.85)');
+                gradient.addColorStop(0.55, 'rgba(168, 85, 247, 0.75)');
+                gradient.addColorStop(1.0, 'rgba(56, 189, 248, 0.9)');
 
                 ctx.fillStyle = gradient;
 
-                // Draw Bar Segments
+                // Draw Segmented Blocks
                 const blockHeight = 4;
                 const blockGap = 2;
                 let currentY = canvas.height - 10;
@@ -316,10 +351,10 @@
                     currentY -= (blockHeight + blockGap);
                 }
 
-                // Draw Floating Peak Line
+                // Floating Peak Line
                 if (peakHeights[i] > 2) {
                     const peakY = canvas.height - 10 - peakHeights[i];
-                    ctx.fillStyle = 'rgba(247, 231, 161, 0.95)'; // Glowing Gold Peak
+                    ctx.fillStyle = 'rgba(247, 231, 161, 0.95)';
                     ctx.fillRect(x, peakY, barWidth, 2);
                 }
 
@@ -327,5 +362,3 @@
             }
         }
     </script>
-</body>
-</html>
