@@ -196,11 +196,12 @@
 
         <!-- Bottom Status Bar -->
         <div class="hud-footer">
-            <span>MIC_INPUT: ACTIVE</span>
+            <span>MIC_INPUT: RAW_DIRECT</span>
             <span>DECAY: GRAVITY_SMOOTH</span>
             <span>GAIN: DYNAMIC</span>
         </div>
     </div>
+
     <script>
         const canvas = document.getElementById('visCanvas');
         const ctx = canvas.getContext('2d');
@@ -241,14 +242,23 @@
             if (isInitialized) return;
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                // Force raw input: Bypass iOS background noise suppression & ducking
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: false,
+                        autoGainControl: false,
+                        noiseSuppression: false
+                    }, 
+                    video: false 
+                });
                 
                 analyser = audioCtx.createAnalyser();
                 microphone = audioCtx.createMediaStreamSource(stream);
                 
-                // Increased FFT size to 512 for higher frequency resolution in low end
                 analyser.fftSize = 512; 
-                analyser.smoothingTimeConstant = 0.5;
+                // Set low native smoothing so transient impacts (kick/snare) hit instantly
+                analyser.smoothingTimeConstant = 0.1; 
                 microphone.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -304,7 +314,7 @@
                 }
                 const rawValue = count > 0 ? sum / count : 0;
 
-                // Frequency curve boost (high frequencies need slight artificial boost for mic sensitivity)
+                // High-end sensitivity boost to compensate for mic roll-off
                 const highBoost = 1 + (i * 0.12);
                 const boostedValue = Math.min(255, rawValue * highBoost);
 
@@ -312,28 +322,28 @@
 
                 // --- Smooth Bar Decay Physics ---
                 if (targetHeight > currentHeights[i]) {
-                    currentHeights[i] = targetHeight;
+                    currentHeights[i] = targetHeight; // Instant rise on impact
                 } else {
-                    currentHeights[i] -= 2.8;
+                    currentHeights[i] -= 2.8; // Gravity fall rate
                     if (currentHeights[i] < 0) currentHeights[i] = 0;
                 }
 
                 // --- Peak Cap Decay Physics ---
                 if (currentHeights[i] > peakHeights[i]) {
                     peakHeights[i] = currentHeights[i];
-                    peakHoldTimers[i] = 12;
+                    peakHoldTimers[i] = 12; // Hold peak briefly
                 } else {
                     if (peakHoldTimers[i] > 0) {
                         peakHoldTimers[i]--;
                     } else {
-                        peakHeights[i] -= 1.2;
+                        peakHeights[i] -= 1.2; // Floating peak decay
                         if (peakHeights[i] < 0) peakHeights[i] = 0;
                     }
                 }
 
                 const h = currentHeights[i];
 
-                // Luxury Corporate Color Palette
+                // Luxury Corporate Color Palette (Champagne -> Amethyst -> Cyan)
                 const gradient = ctx.createLinearGradient(0, canvas.height - 10, 0, canvas.height - 10 - maxHeight);
                 gradient.addColorStop(0.0, 'rgba(212, 175, 55, 0.85)');
                 gradient.addColorStop(0.55, 'rgba(168, 85, 247, 0.75)');
@@ -362,3 +372,5 @@
             }
         }
     </script>
+</body>
+</html>
