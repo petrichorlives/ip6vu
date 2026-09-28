@@ -42,7 +42,7 @@
             padding-right: max(14px, env(safe-area-inset-right));
         }
 
-        /* Scanline Overlay Across All Bays */
+        /* Scanline Overlay */
         .vfd-container::before {
             content: "";
             position: absolute;
@@ -66,7 +66,7 @@
             z-index: 4;
         }
 
-        /* Recessed Modular Bays (Name Bay, Clock Bay, Visualizer Bay) */
+        /* Recessed Modular Bays */
         .faceplate-bay {
             background: #09080a;
             border: 1px solid rgba(119, 58, 77, 0.22);
@@ -139,6 +139,7 @@
             cursor: pointer;
             text-align: center;
             padding: 20px;
+            overflow: hidden;
         }
         #overlay h1 {
             font-size: 11px;
@@ -147,6 +148,7 @@
             margin-bottom: 6px;
             color: rgba(238, 134, 149, 0.7);
             text-transform: lowercase;
+            position: relative;
         }
         #overlay p {
             font-size: 8px;
@@ -159,9 +161,9 @@
             display: none;
             font-family: monospace;
             font-size: 8px;
-            color: rgba(207, 120, 98, 0.6);
+            color: rgba(207, 120, 98, 0.75);
             text-align: left;
-            width: 200px;
+            width: 220px;
             margin-top: 15px;
             line-height: 1.6;
         }
@@ -177,17 +179,76 @@
             width: 0%;
             height: 100%;
             background: #cf7862;
-            transition: width 0.08s linear;
+            transition: width 0.1s linear;
+        }
+
+        /* --- VHS Screen Tear & Tracking Distortion Styles --- */
+        .vhs-active {
+            animation: vhs-roll 4s infinite linear;
+        }
+
+        .vhs-tear-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(238, 134, 149, 0.15) 20%, 
+                rgba(255, 255, 255, 0.4) 50%, 
+                rgba(207, 120, 98, 0.2) 80%, 
+                transparent 100%);
+            box-shadow: 0 0 15px rgba(238, 134, 149, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 25;
+            mix-blend-mode: screen;
+        }
+
+        .vhs-tear-active {
+            animation: vhs-tracking-bar 2.8s infinite ease-in-out;
+        }
+
+        .glitch-text {
+            animation: glitch-skew 1.2s infinite ease-in-out alternate-reverse;
+        }
+
+        @keyframes vhs-tracking-bar {
+            0% { top: -10%; opacity: 0; transform: scaleY(1) skewX(0deg); }
+            10% { opacity: 0.8; transform: scaleY(1.8) skewX(25deg); }
+            35% { opacity: 0.9; transform: scaleY(0.8) skewX(-15deg); }
+            60% { top: 110%; opacity: 0.3; transform: scaleY(2.5) skewX(40deg); }
+            100% { top: 110%; opacity: 0; }
+        }
+
+        @keyframes glitch-skew {
+            0% { transform: translate(0, 0) skew(0deg); }
+            20% { transform: translate(-2px, 1px) skew(-2deg); }
+            40% { transform: translate(1px, -1px) skew(1deg); }
+            60% { transform: translate(-3px, 0px) skew(4deg); filter: blur(0.5px); }
+            80% { transform: translate(2px, 1px) skew(-1deg); }
+            100% { transform: translate(0, 0) skew(0deg); }
+        }
+
+        @keyframes vhs-roll {
+            0% { transform: translateY(0); }
+            94% { transform: translateY(0); }
+            96% { transform: translateY(-8px); }
+            98% { transform: translateY(5px); }
+            100% { transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div class="vfd-container">
+    <div class="vfd-container" id="chassis">
+        <!-- VHS Tracking Distortion Line Overlay -->
+        <div class="vhs-tear-line" id="vhs-bar"></div>
+
         <!-- Initializer Overlay -->
         <div id="overlay">
             <div id="start-prompt">
-                <h1>aethelgard lx-12</h1>
+                <h1 id="title-text">aethelgard lx-12</h1>
                 <p>[ tap to initialize ]</p>
             </div>
             
@@ -217,11 +278,14 @@
         const canvas = document.getElementById('visCanvas');
         const ctx = canvas.getContext('2d');
         const overlay = document.getElementById('overlay');
+        const chassis = document.getElementById('chassis');
         const startPrompt = document.getElementById('start-prompt');
+        const titleText = document.getElementById('title-text');
         const bootSeq = document.getElementById('boot-seq');
         const statusLine = document.getElementById('status-line');
         const progressFill = document.getElementById('progress-fill');
         const timeEl = document.getElementById('time-display');
+        const vhsBar = document.getElementById('vhs-bar');
 
         setInterval(() => {
             const now = new Date();
@@ -251,7 +315,7 @@
             bootSeq.style.display = 'block';
 
             try {
-                // Request access first so the permission dialog appears clean
+                // Request mic permission
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: false,
@@ -261,8 +325,11 @@
                     video: false 
                 });
 
-                // Once granted, trigger the smooth boot animation
-                statusLine.textContent = "> initializing audio dsp...";
+                // Engage VHS Screen Tear / Tracking Distortion Effects during boot
+                vhsBar.classList.add('vhs-tear-active');
+                titleText.classList.add('glitch-text');
+                chassis.classList.add('vhs-active');
+
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
                 microphone = audioCtx.createMediaStreamSource(stream);
@@ -273,15 +340,32 @@
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
 
+                // Extended, Atmospheric Loading Steps Sequence (~6.5 seconds)
+                const bootSteps = [
+                    { pct: 15, text: "> CONNECTING AUDIO STREAM..." },
+                    { pct: 35, text: "> RUNNING VCR TRACKING SYNC..." },
+                    { pct: 55, text: "> ANALOG LOCK: 44.1kHz / STEREO" },
+                    { pct: 80, text: "> STABILIZING VFD GRID..." },
+                    { pct: 100, text: "> SYSTEM READY // ENGAGING" }
+                ];
+
+                let currentStep = 0;
                 let progress = 0;
+
                 const bootInterval = setInterval(() => {
-                    progress += 6;
+                    progress += 1;
                     progressFill.style.width = `${progress}%`;
+
+                    if (currentStep < bootSteps.length && progress >= bootSteps[currentStep].pct) {
+                        statusLine.textContent = bootSteps[currentStep].text;
+                        currentStep++;
+                    }
+
                     if (progress >= 100) {
                         clearInterval(bootInterval);
-                        finishInitialization();
+                        setTimeout(finishInitialization, 400);
                     }
-                }, 25);
+                }, 60);
 
             } catch (err) {
                 alert('Microphone access is required to run the visualizer.');
@@ -294,6 +378,12 @@
 
         function finishInitialization() {
             isInitialized = true;
+            
+            // Cleanly settle the VHS tracking glitch once boot finishes
+            vhsBar.classList.remove('vhs-tear-active');
+            titleText.classList.remove('glitch-text');
+            chassis.classList.remove('vhs-active');
+
             overlay.style.display = 'none';
             resizeCanvas();
             animate();
