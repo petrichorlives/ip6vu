@@ -17,7 +17,7 @@
             height: 100vh;
             height: 100dvh;
             background-color: #080708;
-            font-family: -apple-system, "SF Pro Text", "Consolas", monospace;
+            font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -42,7 +42,7 @@
             padding-right: max(14px, env(safe-area-inset-right));
         }
 
-        /* Scanline Overlay */
+        /* Scanline Mesh Overlay */
         .vfd-container::before {
             content: "";
             position: absolute;
@@ -124,141 +124,187 @@
             height: 100%;
         }
 
-        /* Overlay */
+        /* --- Minimal Broadcast Overlay --- */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(13, 12, 14, 0.96);
-            backdrop-filter: blur(8px);
+            background: #0a090b;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+            cursor: pointer;
+            padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+        }
+
+        .center-branding {
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: rgba(238, 134, 149, 0.6);
-            z-index: 20;
-            cursor: pointer;
             text-align: center;
-            padding: 20px;
-            overflow: hidden;
         }
-        #overlay h1 {
-            font-size: 11px;
-            font-weight: 400;
-            letter-spacing: 3px;
-            margin-bottom: 6px;
-            color: rgba(238, 134, 149, 0.7);
-            text-transform: lowercase;
+
+        /* Glowing Vector Logo Mark */
+        .logo-mark {
+            width: 82px;
+            height: 82px;
+            margin-bottom: 22px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-mark svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 12px rgba(238, 134, 149, 0.45));
+        }
+
+        /* Lined Broadcast Style Nameplate */
+        .brand-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: #ee8695;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #ee8695 0%, #cf7862 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(238, 134, 149, 0.3);
+            margin-bottom: 4px;
             position: relative;
         }
-        #overlay p {
+
+        .brand-subtitle {
+            font-size: 10px;
+            letter-spacing: 5px;
+            color: rgba(207, 120, 98, 0.7);
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .brand-copyright {
             font-size: 8px;
+            letter-spacing: 1.5px;
+            color: rgba(119, 58, 77, 0.6);
+            font-family: monospace;
+        }
+
+        .start-prompt {
+            margin-top: 24px;
+            font-size: 9px;
             letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(238, 134, 149, 0.5);
+            text-transform: uppercase;
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Bottom Readout Status Bar */
+        .status-bar-container {
+            width: 100%;
+            background: rgba(15, 13, 16, 0.85);
+            border: 1px solid rgba(119, 58, 77, 0.25);
+            border-radius: 4px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .status-readouts {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            color: rgba(207, 120, 98, 0.75);
             text-transform: uppercase;
         }
 
-        .boot-seq {
-            display: none;
-            font-family: monospace;
-            font-size: 8px;
-            color: rgba(207, 120, 98, 0.75);
-            text-align: left;
-            width: 220px;
-            margin-top: 15px;
-            line-height: 1.6;
+        .status-readouts span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-        .progress-bar {
+
+        .status-indicator {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #ee8695;
+            box-shadow: 0 0 6px #ee8695;
+        }
+
+        .boot-progress-bar {
             width: 100%;
-            height: 2px;
-            background: rgba(119, 58, 77, 0.3);
-            margin-top: 8px;
-            position: relative;
+            height: 3px;
+            background: rgba(84, 50, 70, 0.3);
+            border-radius: 2px;
             overflow: hidden;
+            position: relative;
         }
-        .progress-fill {
+
+        .boot-progress-fill {
             width: 0%;
             height: 100%;
-            background: #cf7862;
+            background: linear-gradient(90deg, #773a4d 0%, #cf7862 70%, #ee8695 100%);
+            box-shadow: 0 0 8px rgba(238, 134, 149, 0.6);
             transition: width 0.1s linear;
-        }
-
-        /* --- VHS Screen Tear & Tracking Distortion Styles --- */
-        .vhs-active {
-            animation: vhs-roll 4s infinite linear;
-        }
-
-        .vhs-tear-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 12px;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(238, 134, 149, 0.15) 20%, 
-                rgba(255, 255, 255, 0.4) 50%, 
-                rgba(207, 120, 98, 0.2) 80%, 
-                transparent 100%);
-            box-shadow: 0 0 15px rgba(238, 134, 149, 0.4);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 25;
-            mix-blend-mode: screen;
-        }
-
-        .vhs-tear-active {
-            animation: vhs-tracking-bar 2.8s infinite ease-in-out;
-        }
-
-        .glitch-text {
-            animation: glitch-skew 1.2s infinite ease-in-out alternate-reverse;
-        }
-
-        @keyframes vhs-tracking-bar {
-            0% { top: -10%; opacity: 0; transform: scaleY(1) skewX(0deg); }
-            10% { opacity: 0.8; transform: scaleY(1.8) skewX(25deg); }
-            35% { opacity: 0.9; transform: scaleY(0.8) skewX(-15deg); }
-            60% { top: 110%; opacity: 0.3; transform: scaleY(2.5) skewX(40deg); }
-            100% { top: 110%; opacity: 0; }
-        }
-
-        @keyframes glitch-skew {
-            0% { transform: translate(0, 0) skew(0deg); }
-            20% { transform: translate(-2px, 1px) skew(-2deg); }
-            40% { transform: translate(1px, -1px) skew(1deg); }
-            60% { transform: translate(-3px, 0px) skew(4deg); filter: blur(0.5px); }
-            80% { transform: translate(2px, 1px) skew(-1deg); }
-            100% { transform: translate(0, 0) skew(0deg); }
-        }
-
-        @keyframes vhs-roll {
-            0% { transform: translateY(0); }
-            94% { transform: translateY(0); }
-            96% { transform: translateY(-8px); }
-            98% { transform: translateY(5px); }
-            100% { transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div class="vfd-container" id="chassis">
-        <!-- VHS Tracking Distortion Line Overlay -->
-        <div class="vhs-tear-line" id="vhs-bar"></div>
+    <div class="vfd-container">
 
-        <!-- Initializer Overlay -->
+        <!-- Startup Screen Overlay -->
         <div id="overlay">
-            <div id="start-prompt">
-                <h1 id="title-text">aethelgard lx-12</h1>
-                <p>[ tap to initialize ]</p>
+            <div class="center-branding">
+                <!-- Globe Logo Mark -->
+                <div class="logo-mark">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="44" stroke="#773a4d" stroke-width="1.5" stroke-dasharray="2 2" />
+                        <ellipse cx="50" cy="50" rx="44" ry="18" stroke="#cf7862" stroke-width="1.5" />
+                        <ellipse cx="50" cy="50" rx="44" ry="32" stroke="#ee8695" stroke-width="1.2" />
+                        <ellipse cx="50" cy="50" rx="18" ry="44" stroke="#cf7862" stroke-width="1.5" />
+                        <line x1="6" y1="50" x2="94" y2="50" stroke="#ee8695" stroke-width="1.5" />
+                        <line x1="50" y1="6" x2="50" y2="94" stroke="#ee8695" stroke-width="1.5" />
+                    </svg>
+                </div>
+
+                <div class="brand-title">aethelgard</div>
+                <div class="brand-subtitle">lx-12 audio system</div>
+                <div class="brand-copyright">© AETHELGARD DSP LABS 2026</div>
+
+                <div class="start-prompt" id="start-prompt">[ tap screen to initialize ]</div>
             </div>
-            
-            <div class="boot-seq" id="boot-seq">
-                <div id="status-line">&gt; awaiting mic approval...</div>
-                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+            <!-- Bottom Status Readout Bar -->
+            <div class="status-bar-container">
+                <div class="status-readouts">
+                    <span><i class="status-indicator"></i><span id="sys-status">SYS_IDLE</span></span>
+                    <span id="status-line">AWAITING INPUT</span>
+                    <span id="pct-display">00%</span>
+                </div>
+                <div class="boot-progress-bar">
+                    <div class="boot-progress-fill" id="progress-fill"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Header with Segmented Faceplate Bays -->
+        <!-- Visualizer Header -->
         <div class="vfd-header">
             <div class="faceplate-bay name-bay">
                 <div class="device-name">aethelgard lx-12</div>
@@ -268,7 +314,7 @@
             </div>
         </div>
 
-        <!-- Visualizer Faceplate Bay -->
+        <!-- Visualizer Canvas Bay -->
         <div class="vis-container faceplate-bay">
             <canvas id="visCanvas"></canvas>
         </div>
@@ -278,14 +324,12 @@
         const canvas = document.getElementById('visCanvas');
         const ctx = canvas.getContext('2d');
         const overlay = document.getElementById('overlay');
-        const chassis = document.getElementById('chassis');
         const startPrompt = document.getElementById('start-prompt');
-        const titleText = document.getElementById('title-text');
-        const bootSeq = document.getElementById('boot-seq');
+        const sysStatus = document.getElementById('sys-status');
         const statusLine = document.getElementById('status-line');
+        const pctDisplay = document.getElementById('pct-display');
         const progressFill = document.getElementById('progress-fill');
         const timeEl = document.getElementById('time-display');
-        const vhsBar = document.getElementById('vhs-bar');
 
         setInterval(() => {
             const now = new Date();
@@ -312,10 +356,10 @@
             isBooting = true;
 
             startPrompt.style.display = 'none';
-            bootSeq.style.display = 'block';
+            sysStatus.textContent = "SYS_BOOT";
 
             try {
-                // Request mic permission
+                // Request microphone access
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: false,
@@ -324,11 +368,6 @@
                     }, 
                     video: false 
                 });
-
-                // Engage VHS Screen Tear / Tracking Distortion Effects during boot
-                vhsBar.classList.add('vhs-tear-active');
-                titleText.classList.add('glitch-text');
-                chassis.classList.add('vhs-active');
 
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
@@ -340,13 +379,12 @@
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-                // Extended, Atmospheric Loading Steps Sequence (~6.5 seconds)
+                // Multi-stage status sequence
                 const bootSteps = [
-                    { pct: 15, text: "> CONNECTING AUDIO STREAM..." },
-                    { pct: 35, text: "> RUNNING VCR TRACKING SYNC..." },
-                    { pct: 55, text: "> ANALOG LOCK: 44.1kHz / STEREO" },
-                    { pct: 80, text: "> STABILIZING VFD GRID..." },
-                    { pct: 100, text: "> SYSTEM READY // ENGAGING" }
+                    { pct: 20, text: "STREAM_INIT" },
+                    { pct: 45, text: "CALIBRATING_DSP" },
+                    { pct: 75, text: "GRID_SYNC_OK" },
+                    { pct: 100, text: "SYSTEM_ONLINE" }
                 ];
 
                 let currentStep = 0;
@@ -355,6 +393,7 @@
                 const bootInterval = setInterval(() => {
                     progress += 1;
                     progressFill.style.width = `${progress}%`;
+                    pctDisplay.textContent = `${String(progress).padStart(2, '0')}%`;
 
                     if (currentStep < bootSteps.length && progress >= bootSteps[currentStep].pct) {
                         statusLine.textContent = bootSteps[currentStep].text;
@@ -363,27 +402,22 @@
 
                     if (progress >= 100) {
                         clearInterval(bootInterval);
-                        setTimeout(finishInitialization, 400);
+                        setTimeout(finishInitialization, 300);
                     }
-                }, 60);
+                }, 40);
 
             } catch (err) {
                 alert('Microphone access is required to run the visualizer.');
                 console.error(err);
                 isBooting = false;
                 startPrompt.style.display = 'block';
-                bootSeq.style.display = 'none';
+                sysStatus.textContent = "SYS_IDLE";
+                statusLine.textContent = "AWAITING INPUT";
             }
         });
 
         function finishInitialization() {
             isInitialized = true;
-            
-            // Cleanly settle the VHS tracking glitch once boot finishes
-            vhsBar.classList.remove('vhs-tear-active');
-            titleText.classList.remove('glitch-text');
-            chassis.classList.remove('vhs-active');
-
             overlay.style.display = 'none';
             resizeCanvas();
             animate();
