@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRT Audio Spectrum Terminal</title>
+    <title>AETHELGARD SYNC // 12-BAND ANALYZER</title>
     <style>
         * {
             box-sizing: border-box;
@@ -15,81 +15,98 @@
         body, html {
             width: 100vw;
             height: 100vh;
-            background-color: #030303;
-            font-family: "Courier New", Courier, monospace;
+            background-color: #030305;
+            font-family: -apple-system, "SF Pro Text", "Consolas", monospace;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* CRT Container simulating the tube screen */
-        .crt-screen {
+        /* Outer Frame / Bezel Enclosure */
+        .cyber-bezel {
             width: 100vw;
             height: 100vh;
-            background-color: #050b05; /* Deep phosphor green-black tint */
+            background: radial-gradient(circle at center, #0a0b10 0%, #030305 100%);
+            border: 1px solid rgba(212, 175, 55, 0.15);
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            /* Curved CRT corner vignette */
-            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.9);
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95);
         }
 
-        /* Scanline Overlay Effect */
-        .crt-screen::before {
-            content: " ";
-            display: block;
+        /* Subtle Luxury Scanline Overlay */
+        .cyber-bezel::before {
+            content: "";
             position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
-            background-size: 100% 4px;
-            z-index: 5;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 3px;
+            z-index: 6;
             pointer-events: none;
+            opacity: 0.7;
         }
 
-        /* Screen Flicker Simulation */
-        .crt-screen::after {
-            content: " ";
-            display: block;
+        /* Micro Corner Reticles / Corporate Branding Details */
+        .corner-tag {
             position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: rgba(18, 255, 128, 0.02);
-            opacity: 0.8;
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            color: rgba(212, 175, 55, 0.4);
             z-index: 5;
-            pointer-events: none;
-            animation: flicker 0.15s infinite;
+            text-transform: uppercase;
         }
+        .tag-tl { top: 8px; left: 12px; }
+        .tag-tr { top: 8px; right: 12px; }
+        .tag-bl { bottom: 8px; left: 12px; }
+        .tag-br { bottom: 8px; right: 12px; }
 
-        @keyframes flicker {
-            0% { opacity: 0.027; }
-            50% { opacity: 0.015; }
-            100% { opacity: 0.025; }
-        }
-
-        /* Top HUD Readout */
-        .crt-header {
-            height: 40px;
+        /* Corporate HUD Header */
+        .hud-header {
+            height: 38px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            color: #33ff66;
-            font-size: 13px;
+            padding: 0 16px;
+            margin-top: 12px;
+            color: #d4af37; /* Champagne Gold */
+            font-size: 10px;
             letter-spacing: 2px;
-            text-shadow: 0 0 8px rgba(51, 255, 102, 0.7);
-            border-bottom: 1px dashed rgba(51, 255, 102, 0.3);
-            z-index: 2;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+            z-index: 4;
         }
 
-        /* Visualizer Area */
-        .visualizer-area {
+        .corp-logo {
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #f7e7a1;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .corp-logo::before {
+            content: "◆";
+            font-size: 8px;
+            color: #a855f7;
+        }
+
+        .hud-metrics {
+            display: flex;
+            gap: 16px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 9px;
+        }
+
+        /* Canvas & Visualizer Container */
+        .vis-container {
             flex: 1;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding: 10px 20px 25px 20px;
+            padding: 8px 16px 8px 16px;
             z-index: 2;
         }
 
@@ -101,82 +118,87 @@
             height: 100%;
         }
 
-        /* Bottom Status Line */
-        .crt-footer {
-            height: 25px;
+        /* HUD Footer */
+        .hud-footer {
+            height: 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            color: #22aa44;
-            font-size: 11px;
-            letter-spacing: 1px;
-            border-top: 1px dashed rgba(51, 255, 102, 0.2);
-            z-index: 2;
+            padding: 0 16px;
+            margin-bottom: 6px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 4;
         }
 
-        /* Initialization Overlay */
+        /* Luxury Tap Overlay */
         #overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(2, 5, 2, 0.95);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 3, 5, 0.94);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #33ff66;
-            z-index: 10;
+            color: #d4af37;
+            z-index: 20;
             cursor: pointer;
             text-align: center;
             padding: 20px;
-            text-shadow: 0 0 10px rgba(51, 255, 102, 0.8);
         }
         #overlay h1 {
-            font-size: 16px;
-            margin-bottom: 12px;
-            letter-spacing: 3px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            color: #f7e7a1;
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
         }
         #overlay p {
-            font-size: 11px;
-            color: #22aa44;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <div class="crt-screen">
-        <!-- Interactive Start Overlay -->
+    <div class="cyber-bezel">
+        <!-- Structural Corner Markings -->
+        <div class="corner-tag tag-tl">SYS//06S</div>
+        <div class="corner-tag tag-tr">LXS-800</div>
+        <div class="corner-tag tag-bl">SEC//OK</div>
+        <div class="corner-tag tag-br">AETH.CORP</div>
+
+        <!-- Initializer Screen -->
         <div id="overlay">
-            <h1>SYS.MONITOR // 12-CH ANALYZER</h1>
-            <p>&gt; CLICK TO INITIALIZE AUDIO STREAM &lt;</p>
+            <h1>AETHELGARD AUDIO ANALYZER</h1>
+            <p>[ TAP SCREEN TO ENGAGE SYNC ]</p>
         </div>
 
-        <!-- Terminal Header -->
-        <div class="crt-header">
-            <span>CH: 12-BAND FFT</span>
-            <span id="system-time">TIME: --:--:--</span>
-            <span>MODE: CRT-FLAT</span>
+        <!-- Corporate Top Header -->
+        <div class="hud-header">
+            <div class="corp-logo">AETHELGARD // LX-12</div>
+            <div class="hud-metrics">
+                <span>FREQ: 20Hz - 20kHz</span>
+                <span id="time-display">00:00:00</span>
+            </div>
         </div>
 
-        <!-- Main Visualizer Canvas -->
-        <div class="visualizer-area">
+        <!-- Spectrum Visualizer Viewport -->
+        <div class="vis-container">
             <canvas id="visCanvas"></canvas>
         </div>
 
-        <!-- Terminal Footer -->
-        <div class="crt-footer">
-            <span>STATUS: ACTIVE</span>
-            <span>INPUT: MIC_ARRAY</span>
-            <span>GAIN: AUTO</span>
+        <!-- Bottom Status Bar -->
+        <div class="hud-footer">
+            <span>MIC_INPUT: ACTIVE</span>
+            <span>DECAY: GRAVITY_SMOOTH</span>
+            <span>GAIN: DYNAMIC</span>
         </div>
     </div>
 
@@ -184,16 +206,22 @@
         const canvas = document.getElementById('visCanvas');
         const ctx = canvas.getContext('2d');
         const overlay = document.getElementById('overlay');
-        const timeEl = document.getElementById('system-time');
+        const timeEl = document.getElementById('time-display');
 
-        // Clock generator
+        // Clock Update
         setInterval(() => {
-            const d = new Date();
-            timeEl.textContent = `TIME: ${d.toTimeString().split(' ')[0]}`;
+            const now = new Date();
+            timeEl.textContent = now.toTimeString().split(' ')[0];
         }, 1000);
 
         let audioCtx, analyser, microphone, dataArray;
         let isInitialized = false;
+
+        // Visualizer Physics & Gravity State (12 Bars)
+        const BARS_COUNT = 12;
+        let currentHeights = new Array(BARS_COUNT).fill(0);
+        let peakHeights = new Array(BARS_COUNT).fill(0);
+        let peakHoldTimers = new Array(BARS_COUNT).fill(0);
 
         overlay.addEventListener('click', async () => {
             if (isInitialized) return;
@@ -205,6 +233,7 @@
                 microphone = audioCtx.createMediaStreamSource(stream);
                 
                 analyser.fftSize = 64; 
+                analyser.smoothingTimeConstant = 0.6; // Soft hardware-style response
                 microphone.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -215,7 +244,7 @@
                 resizeCanvas();
                 animate();
             } catch (err) {
-                alert('Microphone access denied or unavailable.');
+                alert('Microphone access is required.');
                 console.error(err);
             }
         });
@@ -231,46 +260,71 @@
             if (!isInitialized) return;
 
             analyser.getByteFrequencyData(dataArray);
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const totalBars = 12; // Exactly 12 frequency ranges
-            const totalGaps = totalBars + 1;
-            const availableWidth = canvas.width - 40; // Margins
-            const barWidth = Math.floor(availableWidth / totalBars) - 8;
-            let x = 20;
+            const paddingX = 24;
+            const availableWidth = canvas.width - (paddingX * 2);
+            const barGap = 10;
+            const barWidth = Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT);
+            let x = paddingX;
 
-            for (let i = 0; i < totalBars; i++) {
-                const dataIndex = Math.floor(i * (dataArray.length / totalBars));
-                let value = dataArray[dataIndex];
-                
-                const barHeight = (value / 255) * (canvas.height - 30);
+            const maxHeight = canvas.height - 30;
 
-                // Phosphor green spectrum styling with intense glow
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = '#33ff66';
-                ctx.fillStyle = '#33ff66';
+            for (let i = 0; i < BARS_COUNT; i++) {
+                // Map audio bins to 12 distinct bands
+                const binIndex = Math.floor(i * (dataArray.length / BARS_COUNT));
+                const targetHeight = (dataArray[binIndex] / 255) * maxHeight;
 
-                // Retro CRT Segment Blocks
-                const blockHeight = 6;
-                const gap = 3;
+                // --- Smooth Bar Decay Physics ---
+                if (targetHeight > currentHeights[i]) {
+                    currentHeights[i] = targetHeight; // Instant rise on impact
+                } else {
+                    currentHeights[i] -= 2.8; // Smooth, luxurious fall rate
+                    if (currentHeights[i] < 0) currentHeights[i] = 0;
+                }
+
+                // --- Peak Cap Decay Physics ---
+                if (currentHeights[i] > peakHeights[i]) {
+                    peakHeights[i] = currentHeights[i];
+                    peakHoldTimers[i] = 12; // Hold peak floating briefly
+                } else {
+                    if (peakHoldTimers[i] > 0) {
+                        peakHoldTimers[i]--;
+                    } else {
+                        peakHeights[i] -= 1.2; // Floating peak falls with subtle gravity
+                        if (peakHeights[i] < 0) peakHeights[i] = 0;
+                    }
+                }
+
+                const h = currentHeights[i];
+
+                // Luxury Corporate Color Palette: Champagne Gold -> Muted Amethyst -> Soft Cyan
+                const gradient = ctx.createLinearGradient(0, canvas.height - 10, 0, canvas.height - 10 - maxHeight);
+                gradient.addColorStop(0.0, 'rgba(212, 175, 55, 0.85)');  /* Gold */
+                gradient.addColorStop(0.55, 'rgba(168, 85, 247, 0.75)'); /* Amethyst */
+                gradient.addColorStop(1.0, 'rgba(56, 189, 248, 0.9)');   /* Cyan */
+
+                ctx.fillStyle = gradient;
+
+                // Draw Bar Segments
+                const blockHeight = 4;
+                const blockGap = 2;
                 let currentY = canvas.height - 10;
                 
-                while (currentY > canvas.height - 10 - barHeight) {
+                while (currentY > canvas.height - 10 - h) {
                     ctx.fillRect(x, currentY, barWidth, blockHeight);
-                    currentY -= (blockHeight + gap);
+                    currentY -= (blockHeight + blockGap);
                 }
 
-                // Floating peak indicator line
-                if (barHeight > 5) {
-                    ctx.fillStyle = '#ffffff'; // White-hot peak
-                    ctx.fillRect(x, currentY - 2, barWidth, 2);
+                // Draw Floating Peak Line
+                if (peakHeights[i] > 2) {
+                    const peakY = canvas.height - 10 - peakHeights[i];
+                    ctx.fillStyle = 'rgba(247, 231, 161, 0.95)'; // Glowing Gold Peak
+                    ctx.fillRect(x, peakY, barWidth, 2);
                 }
 
-                x += barWidth + 8;
+                x += barWidth + barGap;
             }
-            // Reset shadow state
-            ctx.shadowBlur = 0;
         }
     </script>
 </body>
