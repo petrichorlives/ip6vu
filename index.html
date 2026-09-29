@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aethelgard Audio Works</title>
+    <title>Aethelgard Audio Works - LX-12 Precision Audio Processor</title>
     <style>
         * {
             box-sizing: border-box;
@@ -16,7 +16,7 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background-color: #080708;
+            background-color: #050405;
             font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
             overflow: hidden;
             display: flex;
@@ -29,17 +29,17 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background: radial-gradient(circle at center, #161416 0%, #0d0c0e 85%, #070607 100%);
+            background: radial-gradient(circle at center, #151316 0%, #0c0b0d 85%, #050405 100%);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             overflow: hidden;
-            gap: 10px;
-            padding-top: max(14px, env(safe-area-inset-top));
-            padding-bottom: max(14px, env(safe-area-inset-bottom));
-            padding-left: max(14px, env(safe-area-inset-left));
-            padding-right: max(14px, env(safe-area-inset-right));
+            gap: 8px;
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            padding-left: max(12px, env(safe-area-inset-left));
+            padding-right: max(12px, env(safe-area-inset-right));
         }
 
         /* Scanline Overlay */
@@ -56,72 +56,208 @@
             opacity: 0.85;
         }
 
+        /* Industrial Corner Hex Screw Heads */
+        .corner-screw {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2a2528 0%, #0d0c0e 100%);
+            border: 1px solid rgba(119, 58, 77, 0.4);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .corner-screw::after {
+            content: "";
+            width: 5px;
+            height: 1.5px;
+            background: rgba(119, 58, 77, 0.6);
+            transform: rotate(45deg);
+        }
+        .screw-tl { top: 6px; left: 6px; }
+        .screw-tr { top: 6px; right: 6px; }
+        .screw-bl { bottom: 6px; left: 6px; }
+        .screw-br { bottom: 6px; right: 6px; }
+
         /* Top Faceplate Header Frame */
         .vfd-header {
-            height: 32px;
+            height: 36px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             z-index: 4;
         }
 
         /* Recessed Modular Bays */
         .faceplate-bay {
             background: #09080a;
-            border: 1px solid rgba(119, 58, 77, 0.22);
-            border-top-color: rgba(0, 0, 0, 0.8);
-            border-left-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(119, 58, 77, 0.25);
+            border-top-color: rgba(0, 0, 0, 0.9);
+            border-left-color: rgba(0, 0, 0, 0.9);
             border-radius: 3px;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.03);
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.95), 0 1px 0 rgba(255, 255, 255, 0.03);
             display: flex;
             align-items: center;
             padding: 0 10px;
+            position: relative;
         }
 
         .name-bay {
             height: 100%;
-            flex: 0 1 auto;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Louvered Vent Grille Module */
+        .vent-bay {
+            height: 100%;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            overflow: hidden;
+        }
+
+        .vent-grille {
+            width: 100%;
+            height: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .vent-slat {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(180deg, #040304 0%, #1c171a 100%);
+            border-bottom: 1px solid rgba(119, 58, 77, 0.35);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.8);
         }
 
         .clock-bay {
             height: 100%;
             flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Hardware Status Indicators (LED Array) */
+        .led-array {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-right: 6px;
+            border-right: 1px solid rgba(119, 58, 77, 0.2);
+        }
+
+        .led-node {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #1e1217;
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .led-node.active-pwr {
+            background: #ee8695;
+            box-shadow: 0 0 6px #ee8695;
+        }
+
+        .led-node.active-dsp {
+            background: #cf7862;
+            box-shadow: 0 0 6px #cf7862;
         }
 
         .device-name {
-            font-size: 9px;
-            letter-spacing: 2px;
-            color: rgba(238, 134, 149, 0.55);
-            font-weight: 500;
+            font-size: 8.5px;
+            letter-spacing: 2.2px;
+            color: rgba(238, 134, 149, 0.7);
+            font-weight: 700;
             text-transform: uppercase;
         }
 
         .time-display {
             font-size: 9px;
             letter-spacing: 1.5px;
-            color: rgba(207, 120, 98, 0.45);
+            color: rgba(207, 120, 98, 0.65);
             font-family: monospace;
         }
 
-        /* Visualizer Main Bay */
+        /* Visualizer Main Bay Housing */
         .vis-container {
             flex: 1;
             position: relative;
             display: flex;
-            justify-content: center;
-            align-items: flex-end;
+            flex-direction: column;
+            justify-content: space-between;
             z-index: 2;
             overflow: hidden;
-            padding: 4px;
+            padding: 22px 14px 18px 14px;
+        }
+
+        /* Side Gain Tick Marks */
+        .side-ticks {
+            position: absolute;
+            left: 4px;
+            top: 24px;
+            bottom: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .tick-line {
+            width: 4px;
+            height: 1px;
+            background: rgba(119, 58, 77, 0.4);
+        }
+        .tick-line.major {
+            width: 7px;
+            background: rgba(238, 134, 149, 0.5);
+        }
+
+        /* Frequency Channel Labels Bar */
+        .freq-legend-bar {
+            width: 100%;
+            height: 12px;
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 14px;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .freq-label {
+            font-family: monospace;
+            font-size: 7px;
+            color: rgba(207, 120, 98, 0.45);
+            text-align: center;
+            letter-spacing: 0.5px;
         }
 
         canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 20px;
+            left: 14px;
+            right: 14px;
+            bottom: 18px;
+            width: calc(100% - 28px);
+            height: calc(100% - 38px);
         }
 
         /* --- 80s Corporate Tech Startup Overlay --- */
@@ -135,7 +271,7 @@
             align-items: center;
             z-index: 20;
             cursor: pointer;
-            padding: max(28px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
+            padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
         }
 
         .center-branding {
@@ -145,13 +281,14 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            width: 100%;
         }
 
-        /* 80s Geometric Logo Icon */
+        /* 80s High-Tech Interlocking AAW Monogram Crest */
         .logo-mark {
-            width: 110px;
-            height: 70px;
-            margin-bottom: 24px;
+            width: 170px;
+            height: 75px;
+            margin-bottom: 22px;
             position: relative;
             display: flex;
             justify-content: center;
@@ -161,12 +298,12 @@
         .logo-mark svg {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 0 10px rgba(238, 134, 149, 0.35));
+            filter: drop-shadow(0 0 14px rgba(238, 134, 149, 0.45));
         }
 
         /* Corporate Title Header */
         .brand-title {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 900;
             letter-spacing: 8px;
             color: #ee8695;
@@ -174,57 +311,57 @@
             background: linear-gradient(180deg, #ee8695 0%, #cf7862 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 18px rgba(238, 134, 149, 0.25);
+            text-shadow: 0 0 20px rgba(238, 134, 149, 0.25);
             margin-bottom: 6px;
             position: relative;
         }
 
         .brand-subtitle {
-            font-size: 10px;
-            letter-spacing: 7px;
-            color: rgba(207, 120, 98, 0.75);
+            font-size: 9.5px;
+            letter-spacing: 8px;
+            color: rgba(207, 120, 98, 0.85);
             text-transform: uppercase;
             font-weight: 600;
             margin-bottom: 12px;
-            border-top: 1px solid rgba(119, 58, 77, 0.3);
-            border-bottom: 1px solid rgba(119, 58, 77, 0.3);
-            padding: 3px 0;
+            border-top: 1px solid rgba(119, 58, 77, 0.35);
+            border-bottom: 1px solid rgba(119, 58, 77, 0.35);
+            padding: 4px 0;
             width: 100%;
-            max-width: 280px;
+            max-width: 310px;
         }
 
         .brand-copyright {
             font-size: 8px;
             letter-spacing: 2px;
-            color: rgba(119, 58, 77, 0.6);
+            color: rgba(119, 58, 77, 0.7);
             font-family: monospace;
         }
 
         .start-prompt {
-            margin-top: 28px;
-            font-size: 9px;
+            margin-top: 24px;
+            font-size: 8.5px;
             letter-spacing: 2.5px;
-            color: rgba(238, 134, 149, 0.55);
+            color: rgba(238, 134, 149, 0.65);
             text-transform: uppercase;
             animation: pulse-glow 2s infinite ease-in-out;
         }
 
         @keyframes pulse-glow {
             0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.85; }
+            50% { opacity: 0.95; }
         }
 
         /* Bottom Status Housing & Thicker Loading Bar */
         .status-bar-container {
             width: 100%;
-            background: rgba(14, 12, 15, 0.9);
-            border: 1px solid rgba(119, 58, 77, 0.3);
+            background: rgba(14, 12, 15, 0.94);
+            border: 1px solid rgba(119, 58, 77, 0.35);
             border-radius: 4px;
             padding: 12px 16px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0,0,0,0.5);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 12px rgba(0,0,0,0.6);
         }
 
         .status-readouts {
@@ -234,7 +371,7 @@
             font-family: monospace;
             font-size: 8.5px;
             letter-spacing: 1.5px;
-            color: rgba(207, 120, 98, 0.8);
+            color: rgba(207, 120, 98, 0.85);
             text-transform: uppercase;
         }
 
@@ -252,12 +389,12 @@
             box-shadow: 0 0 6px #ee8695;
         }
 
-        /* Thicker Loading Bar */
+        /* Thicker Loading Bar (6px) */
         .boot-progress-bar {
             width: 100%;
             height: 6px;
-            background: rgba(50, 30, 42, 0.6);
-            border: 1px solid rgba(119, 58, 77, 0.2);
+            background: rgba(50, 30, 42, 0.65);
+            border: 1px solid rgba(119, 58, 77, 0.25);
             border-radius: 2px;
             overflow: hidden;
             position: relative;
@@ -267,12 +404,18 @@
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, #543246 0%, #773a4d 40%, #cf7862 75%, #ee8695 100%);
-            box-shadow: 0 0 10px rgba(238, 134, 149, 0.7);
+            box-shadow: 0 0 10px rgba(238, 134, 149, 0.75);
             transition: width 0.1s linear;
         }
     </style>
 </head>
 <body>
+
+    <!-- Chassis Corner Screws -->
+    <div class="corner-screw screw-tl"></div>
+    <div class="corner-screw screw-tr"></div>
+    <div class="corner-screw screw-bl"></div>
+    <div class="corner-screw screw-br"></div>
 
     <div class="vfd-container">
 
@@ -280,21 +423,53 @@
         <div id="overlay">
             <div class="center-branding">
                 
-                <!-- 80s Tech Crest Logo Mark -->
+                <!-- 80s Precision Corporate AAW Logo Mark -->
                 <div class="logo-mark">
-                    <svg viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Parallel Slashes -->
-                        <path d="M10 60 L35 10 H45 L20 60 Z" fill="#773a4d" />
-                        <path d="M25 60 L50 10 H60 L35 60 Z" fill="#a75252" />
-                        <path d="M40 60 L65 10 H75 L50 60 Z" fill="#cf7862" />
+                    <svg viewBox="0 0 220 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="aawGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ee8695" />
+                                <stop offset="100%" stop-color="#a75252" />
+                            </linearGradient>
+                            <linearGradient id="aawGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#cf7862" />
+                                <stop offset="100%" stop-color="#773a4d" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Outer Emblem Octagonal Frame -->
+                        <path d="M15 15 L35 2 L185 2 L205 15 L205 65 L185 78 L35 78 L15 65 Z" fill="#09080a" stroke="rgba(119, 58, 77, 0.5)" stroke-width="1.5" />
                         
-                        <!-- Segmented 'A' Chevron Wings -->
-                        <path d="M60 10 L105 10 L85 30 L60 30 Z" fill="#ee8695" />
-                        <path d="M60 35 L80 35 L68 47 L60 47 Z" fill="#cf7862" />
-                        <path d="M60 52 L95 52 L87 60 L60 60 Z" fill="#773a4d" />
-                        
-                        <!-- Base Accent Line -->
-                        <rect x="10" y="64" width="95" height="2" fill="#ee8695" opacity="0.6" />
+                        <!-- Lined Interlocking Speed Cuts for 'A 1' -->
+                        <g id="mono-A1">
+                            <!-- Slanted Geometric Legs -->
+                            <path d="M28 66 L52 14 H62 L38 66 Z" fill="url(#aawGrad1)" />
+                            <path d="M42 66 L66 14 H76 L52 66 Z" fill="#773a4d" />
+                            <!-- Crossbar Segment Array -->
+                            <rect x="36" y="38" width="28" height="3" fill="#ee8695" />
+                            <rect x="34" y="44" width="28" height="2" fill="#cf7862" opacity="0.8" />
+                        </g>
+
+                        <!-- Lined Interlocking Speed Cuts for 'A 2' -->
+                        <g id="mono-A2">
+                            <path d="M72 66 L96 14 H106 L82 66 Z" fill="url(#aawGrad1)" />
+                            <path d="M86 66 L110 14 H120 L96 66 Z" fill="#a75252" />
+                            <!-- Crossbar Segment Array -->
+                            <rect x="80" y="38" width="28" height="3" fill="#ee8695" />
+                            <rect x="78" y="44" width="28" height="2" fill="#cf7862" opacity="0.8" />
+                        </g>
+
+                        <!-- High-Tech Chevron 'W' -->
+                        <g id="mono-W">
+                            <path d="M124 14 L142 66 H151 L133 14 Z" fill="url(#aawGrad2)" />
+                            <path d="M142 66 L158 24 H167 L151 66 Z" fill="#ee8695" />
+                            <path d="M158 24 L174 66 H183 L167 24 Z" fill="url(#aawGrad1)" />
+                            <path d="M174 66 L192 14 H201 L183 66 Z" fill="#773a4d" />
+                        </g>
+
+                        <!-- Precision Grid Calibration Marks -->
+                        <line x1="25" y1="72" x2="195" y2="72" stroke="#ee8695" stroke-width="1.5" stroke-dasharray="8 3" opacity="0.85" />
+                        <line x1="35" y1="8" x2="185" y2="8" stroke="#cf7862" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
                     </svg>
                 </div>
 
@@ -302,7 +477,7 @@
                 <div class="brand-subtitle">Audio Works</div>
                 <div class="brand-copyright">SYSTEM ARCHITECTURE // MODEL LX-12</div>
 
-                <div class="start-prompt" id="start-prompt">[ tap to power on ]</div>
+                <div class="start-prompt" id="start-prompt">[ tap screen to initialize ]</div>
             </div>
 
             <!-- Bottom Status Readout Bar -->
@@ -321,8 +496,23 @@
         <!-- Visualizer Header -->
         <div class="vfd-header">
             <div class="faceplate-bay name-bay">
+                <div class="led-array">
+                    <div class="led-node active-pwr" title="POWER"></div>
+                    <div class="led-node active-dsp" title="DSP"></div>
+                </div>
                 <div class="device-name">Aethelgard Audio Works</div>
             </div>
+
+            <!-- Recessed Louvered Vent Bay -->
+            <div class="faceplate-bay vent-bay">
+                <div class="vent-grille">
+                    <div class="vent-slat"></div>
+                    <div class="vent-slat"></div>
+                    <div class="vent-slat"></div>
+                    <div class="vent-slat"></div>
+                </div>
+            </div>
+
             <div class="faceplate-bay clock-bay">
                 <div class="time-display" id="time-display">00:00:00</div>
             </div>
@@ -330,9 +520,37 @@
 
         <!-- Visualizer Canvas Bay -->
         <div class="vis-container faceplate-bay">
+            <!-- Gain Tick Mark Rulers -->
+            <div class="side-ticks">
+                <div class="tick-line major"></div>
+                <div class="tick-line"></div>
+                <div class="tick-line"></div>
+                <div class="tick-line major"></div>
+                <div class="tick-line"></div>
+                <div class="tick-line"></div>
+                <div class="tick-line major"></div>
+            </div>
+
             <canvas id="visCanvas"></canvas>
+
+            <!-- Channel Frequency Readouts Legend -->
+            <div class="freq-legend-bar" id="freq-legend">
+                <div class="freq-label">30</div>
+                <div class="freq-label">80</div>
+                <div class="freq-label">180</div>
+                <div class="freq-label">320</div>
+                <div class="freq-label">600</div>
+                <div class="freq-label">1K</div>
+                <div class="freq-label">1.8K</div>
+                <div class="freq-label">2.8K</div>
+                <div class="freq-label">4.2K</div>
+                <div class="freq-label">6K</div>
+                <div class="freq-label">8.5K</div>
+                <div class="freq-label">16K</div>
+            </div>
         </div>
     </div>
+
 
     <script>
         const canvas = document.getElementById('visCanvas');
@@ -388,7 +606,8 @@
                 microphone = audioCtx.createMediaStreamSource(stream);
                 
                 analyser.fftSize = 512; 
-                analyser.smoothingTimeConstant = 0.2; 
+                // Ultra-snappy response timing
+                analyser.smoothingTimeConstant = 0.08; 
                 microphone.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -438,8 +657,8 @@
         }
 
         function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            canvas.width = canvas.parentElement.clientWidth - 28;
+            canvas.height = canvas.parentElement.clientHeight - 38;
         }
         window.addEventListener('resize', resizeCanvas);
 
@@ -450,17 +669,23 @@
             analyser.getByteFrequencyData(dataArray);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const paddingX = 8;
+            const paddingX = 4;
             const availableWidth = canvas.width - (paddingX * 2);
-            const barGap = Math.max(3, Math.floor(availableWidth * 0.018));
-            const barWidth = Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT);
-            let x = paddingX;
+            
+            // Reduced horizontal bar gap padding by 35% compared to previous version
+            const barGap = Math.max(4, Math.floor(availableWidth * 0.0228));
+            const barWidth = Math.max(8, Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT));
+            
+            // Recenter bar cluster
+            const totalWidth = (barWidth * BARS_COUNT) + (barGap * (BARS_COUNT - 1));
+            let x = Math.floor((canvas.width - totalWidth) / 2);
 
-            const maxHeight = canvas.height - 8;
+            const maxHeight = canvas.height - 4;
             const nyquist = audioCtx.sampleRate / 2;
 
+            // Increased vertical spacing between stacked segments by 15% (blockGap: 2.3px)
             const blockHeight = 4;
-            const blockGap = 2;
+            const blockGap = 2.3;
             const maxSegments = Math.floor(maxHeight / (blockHeight + blockGap));
 
             for (let i = 0; i < BARS_COUNT; i++) {
@@ -478,25 +703,25 @@
                     count++;
                 }
                 const rawValue = count > 0 ? sum / count : 0;
-                const highBoost = 1 + (i * 0.08);
+                const highBoost = 1 + (i * 0.07);
                 const targetHeight = (Math.min(255, rawValue * highBoost) / 255) * maxHeight;
 
-                // Physics (Soft Drop)
+                // Physics (Snappy hit, linear drop)
                 if (targetHeight > currentHeights[i]) {
                     currentHeights[i] = targetHeight;
                 } else {
-                    currentHeights[i] -= 2.0;
+                    currentHeights[i] -= 3.2;
                     if (currentHeights[i] < 0) currentHeights[i] = 0;
                 }
 
                 if (currentHeights[i] > peakHeights[i]) {
                     peakHeights[i] = currentHeights[i];
-                    peakHoldTimers[i] = 12;
+                    peakHoldTimers[i] = 10;
                 } else {
                     if (peakHoldTimers[i] > 0) {
                         peakHoldTimers[i]--;
                     } else {
-                        peakHeights[i] -= 0.8;
+                        peakHeights[i] -= 1.2;
                         if (peakHeights[i] < 0) peakHeights[i] = 0;
                     }
                 }
@@ -504,15 +729,15 @@
                 const activeSegments = Math.floor(currentHeights[i] / (blockHeight + blockGap));
 
                 // 1. Unlit Ghost Segments
-                ctx.fillStyle = 'rgba(84, 50, 70, 0.18)';
+                ctx.fillStyle = 'rgba(84, 50, 70, 0.16)';
                 for (let seg = 0; seg < maxSegments; seg++) {
-                    const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
+                    const segY = canvas.height - 2 - (seg * (blockHeight + blockGap));
                     ctx.fillRect(x, segY, barWidth, blockHeight);
                 }
 
                 // 2. Active Illuminated VFD Segments
                 for (let seg = 0; seg < activeSegments; seg++) {
-                    const segY = canvas.height - 4 - (seg * (blockHeight + blockGap));
+                    const segY = canvas.height - 2 - (seg * (blockHeight + blockGap));
                     const ratio = seg / maxSegments;
 
                     if (ratio < 0.35) {
@@ -538,7 +763,7 @@
 
                 // 3. Floating Peak Cap
                 if (peakHeights[i] > 2) {
-                    const peakY = canvas.height - 4 - peakHeights[i];
+                    const peakY = canvas.height - 2 - peakHeights[i];
                     ctx.fillStyle = '#ee8695';
                     ctx.shadowColor = '#ee8695';
                     ctx.shadowBlur = 4;
