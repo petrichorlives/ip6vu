@@ -214,33 +214,33 @@
             align-items: center;
             text-align: center;
             width: 100%;
-            max-width: 440px;
+            max-width: 460px;
         }
 
-        /* Clean, Uncluttered Modernist Geometric AAW Logo */
-        .aaw-logo-container {
-            width: 100%;
-            max-width: 320px;
-            margin-bottom: 28px;
-            filter: drop-shadow(0 0 12px rgba(238, 134, 149, 0.25));
+        /* Late-Night Broadcast Prominent Stacked Logo Container */
+        .broadcast-logo-container {
+            width: 88%;
+            max-width: 380px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(238, 134, 149, 0.45));
         }
 
-        .aaw-logo-container svg {
+        .broadcast-logo-container svg {
             width: 100%;
             height: auto;
             display: block;
         }
 
         .brand-copyright {
-            font-size: 8px;
+            font-size: 8.5px;
             letter-spacing: 3px;
-            color: rgba(119, 58, 77, 0.7);
+            color: rgba(207, 120, 98, 0.65);
             font-family: monospace;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         .start-prompt {
-            margin-top: 28px;
+            margin-top: 24px;
             font-size: 9px;
             letter-spacing: 2.5px;
             color: rgba(238, 134, 149, 0.65);
@@ -324,33 +324,89 @@
         <div id="overlay">
             <div class="center-branding">
                 
-                <!-- Pure, Ultra-Legible Minimalist Geometric AAW Logo -->
-                <div class="aaw-logo-container">
-                    <svg viewBox="0 0 360 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- 70s/80s Vintage Broadcast Style Stacked Logo Mark -->
+                <div class="broadcast-logo-container">
+                    <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <linearGradient id="aawPureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id="broadcastGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                                 <stop offset="0%" stop-color="#ee8695" />
                                 <stop offset="100%" stop-color="#cf7862" />
                             </linearGradient>
                         </defs>
 
-                        <!-- First 'A' -->
-                        <path d="M 10,110 L 45,10 L 80,110 L 58,110 L 52,90 L 38,90 L 32,110 Z M 45,38 L 41,74 L 49,74 Z" fill="url(#aawPureGrad)" />
+                        <!-- Globe/Acoustic Signal Sphere Emblem -->
+                        <g stroke="url(#broadcastGrad)" stroke-width="2.5" fill="none" opacity="0.95">
+                            <circle cx="160" cy="42" r="32" />
+                            <!-- Horizontal Latitudinal Curves -->
+                            <path d="M 128 42 H 192" />
+                            <path d="M 132 30 Q 160 38 188 30" />
+                            <path d="M 132 54 Q 160 46 188 54" />
+                            <!-- Longitudinal Elliptic Curves -->
+                            <ellipse cx="160" cy="42" rx="16" ry="32" />
+                            <ellipse cx="160" cy="42" rx="8" ry="32" />
+                        </g>
 
-                        <!-- Second 'A' -->
-                        <path d="M 90,110 L 125,10 L 160,110 L 138,110 L 132,90 L 118,90 L 112,110 Z M 125,38 L 121,74 L 129,74 Z" fill="url(#aawPureGrad)" />
+                        <!-- Bold Rounded 'AAW' Monogram Block -->
+                        <g fill="url(#broadcastGrad)">
+                            <!-- First 'A': Soft Arch Cutout -->
+                            <path d="
+                                M 12,148 
+                                L 12,106 
+                                Q 12,86 42,86 
+                                L 52,86 
+                                Q 82,86 82,106 
+                                L 82,148 
+                                L 60,148 
+                                L 60,110 
+                                Q 60,102 47,102 
+                                Q 34,102 34,110 
+                                L 34,148 
+                                Z" />
 
-                        <!-- 'W' -->
-                        <path d="M 170,10 L 188,110 L 210,110 L 225,45 L 240,110 L 262,110 L 280,10 L 258,10 L 250,70 L 234,10 L 216,10 L 200,70 L 192,10 Z" fill="url(#aawPureGrad)" />
+                            <!-- Second 'A': Soft Arch Cutout -->
+                            <path d="
+                                M 92,148 
+                                L 92,106 
+                                Q 92,86 122,86 
+                                L 132,86 
+                                Q 162,86 162,106 
+                                L 162,148 
+                                L 140,148 
+                                L 140,110 
+                                Q 140,102 127,102 
+                                Q 114,102 114,110 
+                                L 114,148 
+                                Z" />
 
-                        <!-- Clean Vertical Separation Rule -->
-                        <line x1="295" y1="12" x2="295" y2="108" stroke="url(#aawPureGrad)" stroke-width="2" opacity="0.4" />
+                            <!-- Curved Waveform 'W' -->
+                            <path d="
+                                M 172,86 
+                                L 192,86 
+                                Q 200,86 204,102 
+                                L 216,134 
+                                L 228,102 
+                                Q 232,86 242,86 
+                                L 246,86 
+                                Q 256,86 260,102 
+                                L 272,134 
+                                L 284,102 
+                                Q 288,86 298,86 
+                                L 308,86 
+                                Q 308,148 288,148 
+                                L 274,148 
+                                Q 262,148 258,132 
+                                L 246,98 
+                                L 234,132 
+                                Q 230,148 218,148 
+                                L 204,148 
+                                Q 184,148 172,86 
+                                Z" />
+                        </g>
 
-                        <!-- Perfectly Matched Color Secondary Typographic Lockup -->
-                        <g fill="url(#aawPureGrad)" font-family="-apple-system, sans-serif" font-weight="700" font-size="10.5" letter-spacing="2.2">
-                            <text x="306" y="46">AETHELGARD</text>
-                            <text x="306" y="66">AUDIO</text>
-                            <text x="306" y="86">WORKS</text>
+                        <!-- Stacked Broadcast Typography Below Logo -->
+                        <g fill="url(#broadcastGrad)" font-family="sans-serif" font-weight="800" text-anchor="middle">
+                            <text x="160" y="180" font-size="20" letter-spacing="7">AETHELGARD</text>
+                            <text x="160" y="204" font-size="14" letter-spacing="11" opacity="0.85">AUDIO WORKS</text>
                         </g>
                     </svg>
                 </div>
