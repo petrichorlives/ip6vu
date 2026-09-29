@@ -42,7 +42,7 @@
             padding-right: max(12px, env(safe-area-inset-right));
         }
 
-        /* Industrial Chassis Rack Screws */
+        /* Industrial Chassis Screws */
         .chassis-screw {
             position: absolute;
             width: 8px;
@@ -192,7 +192,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* --- 80s Tech / CTW Style Startup Overlay --- */
+        /* Startup Overlay */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -214,13 +214,13 @@
             align-items: center;
             text-align: center;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
         }
 
-        /* CTW Style Interlocking Monogram SVG */
+        /* 80s Tech AAW Monogram Badge */
         .ctw-logo-container {
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             margin-bottom: 24px;
             filter: drop-shadow(0 0 16px rgba(238, 134, 149, 0.35));
         }
@@ -233,7 +233,7 @@
 
         .brand-copyright {
             font-size: 8px;
-            letter-spacing: 2px;
+            letter-spacing: 2.5px;
             color: rgba(119, 58, 77, 0.65);
             font-family: monospace;
             margin-top: 4px;
@@ -324,64 +324,81 @@
         <div id="overlay">
             <div class="center-branding">
                 
-                <!-- CTW-Inspired Interlocking Logo Graphic -->
+                <!-- Refined High-Legibility 80s AAW Logo -->
                 <div class="ctw-logo-container">
-                    <svg viewBox="0 0 340 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 360 140" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <linearGradient id="ctwGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <linearGradient id="aawGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                                 <stop offset="0%" stop-color="#ee8695" />
                                 <stop offset="100%" stop-color="#cf7862" />
                             </linearGradient>
-                            <linearGradient id="greenTextGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#80e8a2" />
-                                <stop offset="100%" stop-color="#3cb371" />
+                            <linearGradient id="subtextGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#ee8695" />
+                                <stop offset="100%" stop-color="#cf7862" />
                             </linearGradient>
                         </defs>
 
-                        <!-- Outer Chunky Interlocking AAW Body (CTW Style Geometry) -->
+                        <!-- First 'A': Bold Arch with Counter Cutout -->
                         <path d="
                             M 10,130 
-                            L 10,60 
-                            Q 10,10 60,10 
-                            L 140,10 
-                            L 140,130 
-                            L 110,130 
-                            L 110,50 
-                            L 85,50 
-                            L 85,130 
-                            L 60,130 
-                            L 60,50 
-                            L 40,50 
-                            L 40,130 
-                            Z" fill="url(#ctwGrad)" />
+                            L 10,50 
+                            Q 10,10 50,10 
+                            L 80,10 
+                            L 80,130 
+                            L 56,130 
+                            L 56,58 
+                            L 34,58 
+                            L 34,130 
+                            Z" fill="url(#aawGrad)" />
+                        <!-- First 'A' Triangle Counter -->
+                        <polygon points="34,36 56,36 45,20" fill="#080709" />
 
-                        <!-- Integrated 'W' Block Section Interlocking right -->
+                        <!-- Second 'A': Interlocking Parallel Arch with Counter Cutout -->
                         <path d="
-                            M 140,130 
-                            L 140,65 
-                            L 175,65 
-                            L 195,110 
-                            L 215,65 
-                            L 330,65 
-                            Q 330,130 280,130 
-                            L 250,130 
-                            L 250,90 
-                            L 235,90 
-                            L 235,130 
-                            L 205,130 
-                            L 195,100 
-                            L 185,130 
-                            Z" fill="url(#ctwGrad)" />
+                            M 80,130 
+                            L 80,50 
+                            Q 80,10 120,10 
+                            L 150,10 
+                            L 150,130 
+                            L 126,130 
+                            L 126,58 
+                            L 104,58 
+                            L 104,130 
+                            Z" fill="url(#aawGrad)" />
+                        <!-- Second 'A' Triangle Counter -->
+                        <polygon points="104,36 126,36 115,20" fill="#080709" />
 
-                        <!-- Speed Scanline Slices through bottom block base -->
-                        <rect x="0" y="112" width="340" height="3" fill="#080709" />
-                        <rect x="0" y="120" width="340" height="3" fill="#080709" />
+                        <!-- 'W': Bold Multi-Peak Interlocking Terminal -->
+                        <path d="
+                            M 150,130 
+                            L 150,50 
+                            L 174,50 
+                            L 190,95 
+                            L 206,50 
+                            L 228,50 
+                            L 244,95 
+                            L 260,50 
+                            L 350,50 
+                            Q 350,130 300,130 
+                            L 278,130 
+                            L 278,82 
+                            L 264,82 
+                            L 248,130 
+                            L 224,130 
+                            L 208,82 
+                            L 194,82 
+                            L 194,130 
+                            Z" fill="url(#aawGrad)" />
 
-                        <!-- Stacked Text Block set in upper notch (Like Children's Television Workshop) -->
-                        <g fill="url(#greenTextGrad)" font-family="sans-serif" font-weight="900" font-size="13" letter-spacing="1">
-                            <text x="148" y="24">AETHELGARD</text>
-                            <text x="148" y="38">AUDIO</text>
-                            <text x="148" y="52">WORKS</text>
+                        <!-- Sharp Precision Speed Slices Across Base -->
+                        <rect x="0" y="112" width="360" height="3" fill="#080709" />
+                        <rect x="0" y="120" width="360" height="3" fill="#080709" />
+
+                        <!-- Corrected Color Subtext Block set in upper Notch -->
+                        <g fill="url(#subtextGrad)" font-family="sans-serif" font-weight="900" font-size="12.5" letter-spacing="1.2">
+                            <text x="160" y="22">AETHELGARD</text>
+                            <text x="160" y="35">AUDIO</text>
+                            <text x="160" y="48">WORKS</text>
                         </g>
                     </svg>
                 </div>
@@ -403,7 +420,7 @@
             </div>
         </div>
 
-        <!-- Visualizer Modular Header Frame -->
+        <!-- Visualizer Header Frame -->
         <div class="vfd-header">
             <div class="faceplate-bay name-bay">
                 <div class="status-led"></div>
@@ -553,7 +570,6 @@
             const paddingX = 8;
             const availableWidth = canvas.width - (paddingX * 2);
             
-            /* Horizontal bar gap calculation (reduced by 35%) */
             const barGap = Math.max(2, Math.floor(availableWidth * 0.015 * 0.65));
             const barWidth = Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT);
             let x = paddingX;
@@ -561,7 +577,6 @@
             const maxHeight = canvas.height - 18;
             const nyquist = audioCtx.sampleRate / 2;
 
-            /* Vertical segment block gaps (increased vertical padding) */
             const blockHeight = 4;
             const blockGap = 2.3; 
             const maxSegments = Math.floor(maxHeight / (blockHeight + blockGap));
@@ -584,7 +599,6 @@
                 const highBoost = 1 + (i * 0.08);
                 const targetHeight = (Math.min(255, rawValue * highBoost) / 255) * maxHeight;
 
-                /* Snappy Response Physics */
                 if (targetHeight > currentHeights[i]) {
                     currentHeights[i] = targetHeight; 
                 } else {
