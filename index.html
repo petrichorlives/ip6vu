@@ -136,7 +136,7 @@ const COLORS = ['#543246','#773a4d','#a75252','#cf7862','#ee8695'];
 const BLOCK_H = 4, BLOCK_GAP = 2.3, STEP = BLOCK_H + BLOCK_GAP;
 
 let audioCtx, analyser, dataArray, binRanges;
-let isInitialized = false, isBooting = false, micReady = false, bootRAF = 0;
+let isInitialized = false, isBooting = false, micReady = false, bootRAF = 0, micStream = null;
 
 const heights = new Float32Array(BARS), peaks = new Float32Array(BARS), peakTimers = new Float32Array(BARS), prevTarget = new Float32Array(BARS);
 
@@ -283,6 +283,7 @@ function bootFrame(t0) {
 }
 
 function finishBoot() {
+  if (audioCtx.state !== 'running') audioCtx.resume();
   heights.fill(0); peaks.fill(0);
   $('sys-status').textContent = 'SYS_ON';
   $('flash').classList.add('go');
@@ -306,6 +307,7 @@ overlay.addEventListener('click', async () => {
   $('status-line').textContent = 'AWAITING_MIC_ACCESS';
 
   // created inside the tap so iOS lets it run; 'interactive' = smallest buffer
+  if (audioCtx) { try { audioCtx.close(); } catch (e) {} }
   audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
   audioCtx.resume();
 
@@ -318,7 +320,12 @@ overlay.addEventListener('click', async () => {
     analyser.fftSize = 1024;
     analyser.smoothingTimeConstant = 0;
     analyser.minDecibels = -88; analyser.maxDecibels = -22;
-    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    micStream = stream;                       // keep a reference so iOS doesn't drop the tracks
+    const src = audioCtx.createMediaStreamSource(stream);
+    const mute = audioCtx.createGain(); mute.gain.value = 0;
+    src.connect(analyser);
+    analyser.connect(mute); mute.connect(audioCtx.destination);   // Safari only processes a graph that reaches an output
+    await audioCtx.resume();                  // the permission prompt can leave the context suspended
     dataArray = new Uint8Array(analyser.frequencyBinCount);
     const binHz = audioCtx.sampleRate / analyser.fftSize;
     binRanges = FREQ_BOUNDS.map(([lo, hi]) => {
@@ -344,11 +351,15 @@ overlay.addEventListener('click', async () => {
   bootRAF = requestAnimationFrame(bootFrame(performance.now()));
 });
 
+// any touch can wake a suspended/interrupted context (phone call, app switch, etc.)
+document.addEventListener('pointerdown', () => { if (audioCtx && audioCtx.state !== 'running') audioCtx.resume(); });
+
 /* ---------- live analyzer ---------- */
 let lastT = 0;
 function animate(now) {
   requestAnimationFrame(animate);
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  if (audioCtx.state !== 'running') audioCtx.resume();
   analyser.getByteFrequencyData(dataArray);
 
   const maxH = canvas._h - 18;
