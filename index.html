@@ -37,7 +37,7 @@ padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 
 .vfd-container.on .vis-container{animation:flick .9s .3s both}
 
 /* Boot overlay */
-#overlay{position:absolute;inset:0;background:#050406;display:flex;flex-direction:column;justify-content:space-between;align-items:center;z-index:20;cursor:pointer;
+#overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,#120d10 0%,#07050a 55%,#020203 100%);overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;align-items:center;z-index:20;cursor:pointer;
 padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
 transition:opacity .45s ease,transform .45s ease}
 #overlay.out{opacity:0;transform:scale(1.05);pointer-events:none}
@@ -49,7 +49,7 @@ transition:opacity .45s ease,transform .45s ease}
 @keyframes flashgo{0%{opacity:.85}100%{opacity:0}}
 .center-branding{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;width:100%;max-width:520px;min-height:0}
 .exact-logo-frame{width:80%;max-width:400px;display:flex;justify-content:center;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(238,134,149,.25))}
-.exact-logo-frame img{width:100%;height:auto;max-height:32vh;object-fit:contain;display:block;border-radius:4px}
+.exact-logo-frame img{width:100%;height:auto;max-height:24vh;object-fit:contain;display:block;border-radius:4px}
 .brand-title-group{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:4px}
 .brand-main-title{font-size:14px;font-weight:700;letter-spacing:5px;color:#ee8695;text-transform:uppercase;text-shadow:0 0 10px rgba(238,134,149,.4)}
 .brand-sub-title{font-size:9px;font-weight:500;letter-spacing:4px;color:#cf7862;text-transform:uppercase}
@@ -58,7 +58,8 @@ transition:opacity .45s ease,transform .45s ease}
 @keyframes pulse-glow{0%,100%{opacity:.35}50%{opacity:.95}}
 .boot-stage{width:100%;margin-top:12px;display:none}
 .overlay-booting .boot-stage{display:block}
-#bootCanvas{width:100%;height:68px;display:block;background:#080709;border:1px solid rgba(119,58,77,.25);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
+#gaugeCanvas{width:100%;height:96px;display:block;margin-bottom:6px}
+#bootCanvas{width:100%;height:50px;display:block;background:#080709;border:1px solid rgba(119,58,77,.25);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
 #bootLog{margin-top:8px;font-family:monospace;font-size:8px;letter-spacing:1px;line-height:1.55;color:rgba(207,120,98,.8);text-align:left;white-space:pre;height:calc(8px*1.55*6);overflow:hidden;padding:0 4px}
 .status-bar-container{width:100%;max-width:520px;background:rgba(12,10,13,.95);border:1px solid rgba(119,58,77,.3);border-radius:4px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 2px 12px rgba(0,0,0,.6)}
 .status-readouts{display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:8.5px;letter-spacing:1.5px;color:rgba(207,120,98,.85);text-transform:uppercase}
@@ -67,6 +68,8 @@ transition:opacity .45s ease,transform .45s ease}
 .overlay-booting .status-indicator{animation:pulse-glow .5s infinite}
 .boot-progress-bar{width:100%;height:5px;background:rgba(45,26,38,.7);border:1px solid rgba(119,58,77,.25);border-radius:2px;overflow:hidden}
 .boot-progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#543246,#773a4d 40%,#cf7862 75%,#ee8695);box-shadow:0 0 10px rgba(238,134,149,.8)}
+#streak{position:absolute;top:22%;left:-30%;width:30%;height:90px;background:linear-gradient(90deg,transparent,rgba(232,200,154,.16) 45%,rgba(255,236,210,.5) 50%,rgba(232,200,154,.16) 55%,transparent);filter:blur(7px);opacity:0;pointer-events:none;z-index:24;mix-blend-mode:screen}
+#welcome{margin-top:8px;font-size:9px;letter-spacing:9px;color:#e8c89a;text-transform:uppercase;opacity:0;text-shadow:0 0 12px rgba(232,200,154,.55);padding-left:9px}
 </style>
 </head>
 <body>
@@ -75,7 +78,7 @@ transition:opacity .45s ease,transform .45s ease}
   <div class="chassis-screw screw-bl"></div><div class="chassis-screw screw-br"></div>
 
   <div id="overlay">
-    <div id="flash"></div>
+    <div id="flash"></div><div id="streak"></div>
     <div class="center-branding">
       <div class="exact-logo-frame" id="logoFrame"><img src="logo.png" alt="Voyager Audio Works Logo"></div>
       <div class="brand-title-group">
@@ -85,8 +88,10 @@ transition:opacity .45s ease,transform .45s ease}
       <div class="brand-copyright">MODEL VAW-80 // FREQUENCY SPECTRUM ANALYZER</div>
       <div class="start-prompt" id="start-prompt">[ tap screen to initialize ]</div>
       <div class="boot-stage">
+        <canvas id="gaugeCanvas"></canvas>
         <canvas id="bootCanvas"></canvas>
         <div id="bootLog"></div>
+        <div id="welcome">Good Evening</div>
       </div>
     </div>
     <div class="status-bar-container">
@@ -120,6 +125,7 @@ transition:opacity .45s ease,transform .45s ease}
 const $ = id => document.getElementById(id);
 const canvas = $('visCanvas'), ctx = canvas.getContext('2d');
 const bootCanvas = $('bootCanvas'), bctx = bootCanvas.getContext('2d');
+const gaugeCanvas = $('gaugeCanvas'), gctx = gaugeCanvas.getContext('2d');
 const overlay = $('overlay'), chassis = $('chassis'), logoFrame = $('logoFrame');
 
 setInterval(() => { $('time-display').textContent = new Date().toTimeString().split(' ')[0]; }, 1000);
@@ -141,7 +147,7 @@ function setupCanvas(c, cx) {
   c.width = Math.round(c._w * dpr); c.height = Math.round(c._h * dpr);
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function resizeAll() { setupCanvas(canvas, ctx); setupCanvas(bootCanvas, bctx); }
+function resizeAll() { setupCanvas(canvas, ctx); setupCanvas(bootCanvas, bctx); setupCanvas(gaugeCanvas, gctx); }
 window.addEventListener('resize', resizeAll);
 
 /* Shared renderer: no per-segment shadowBlur (that was a big source of frame lag on iOS).
@@ -179,59 +185,100 @@ function drawBars(c, cx, hts, pks) {
   cx.fillStyle = '#ee8695'; cx.fill(caps);
 }
 
-/* ---------- boot sequence ---------- */
-const DUR = 4700;
+/* ---------- boot sequence: night-noir VIP sedan welcome (7s) ---------- */
+const DUR = 7000;
 const LOG = [
-  [250,  'VAW-80 FIRMWARE 2.4',      'OK'],
-  [850,  'MIC BUS HANDSHAKE',        'LOCK'],
-  [1450, 'DSP CORE CALIBRATION',     'OK'],
-  [2050, '1024-PT FFT / 12 BAND',    'OK'],
-  [2700, 'VFD SEGMENT TEST',         'RUN'],
-  [3650, 'ANALOG OUTPUT STAGE',      'READY']
+  [300,  'VAW-80 FIRMWARE 2.4',    'OK'],
+  [1100, 'MIC BUS HANDSHAKE',      'LOCK'],
+  [1900, 'ANALOG STAGE WARM-UP',   'OK'],
+  [2800, 'CABIN ACOUSTIC PROFILE', 'FLAT'],
+  [3800, '1024-PT FFT / 12 BAND',  'OK'],
+  [4800, 'VFD SEGMENT TEST',       'RUN'],
+  [5900, 'ALL SYSTEMS',            'NOMINAL']
 ];
-const STAGES = [[0,'COLD_START'],[18,'BUS_INITIALIZING'],[40,'CALIBRATING_DSP'],[62,'SEGMENT_TEST'],[85,'ANALOG_LOCK_OK'],[100,'SYSTEM_ONLINE']];
+const STAGES = [[0,'COLD_START'],[15,'WARMING_TUBES'],[30,'GAUGE_SELF_CHECK'],[55,'SIGNAL_PATH_OK'],[78,'SEGMENT_TEST'],[93,'ALL_SYSTEMS_GO'],[100,'SYSTEM_ONLINE']];
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const smooth = x => x * x * (3 - 2 * x);
+
+// Optitron-style gauge: ticks weld on one by one, needle sweeps to redline, then settles
+function drawGauge(t) {
+  const w = gaugeCanvas._w, h = gaugeCanvas._h, g = gctx;
+  g.clearRect(0, 0, w, h);
+  const cx = w / 2, cy = h - 8, R = Math.min(h - 14, w * 0.36), N = 31;
+  const lit = clamp((t - 900) / 1100) * N;
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '7px monospace';
+  for (let i = 0; i < N; i++) {
+    const f = i / (N - 1), a = Math.PI + f * Math.PI, major = i % 5 === 0;
+    const col = f > .85 ? '#ee8695' : f > .7 ? '#cf7862' : '#e8c89a';
+    const on = i < lit;
+    const cos = Math.cos(a), sin = Math.sin(a), r1 = R - (major ? 11 : 6);
+    g.strokeStyle = on ? col : 'rgba(119,58,77,.22)';
+    g.lineWidth = major ? 2 : 1;
+    g.shadowColor = col; g.shadowBlur = on ? 6 : 0;
+    g.beginPath(); g.moveTo(cx + cos * r1, cy + sin * r1); g.lineTo(cx + cos * R, cy + sin * R); g.stroke();
+    if (major && on) { g.shadowBlur = 0; g.fillStyle = 'rgba(232,200,154,.7)'; g.fillText(i / 5, cx + cos * (R - 20), cy + sin * (R - 20)); }
+  }
+  if (t > 800) {
+    let v;
+    if (t < 2000) v = 0;
+    else if (t < 3300) v = 1 - Math.pow(1 - (t - 2000) / 1300, 3);
+    else if (t < 4400) v = 1 - 0.86 * smooth((t - 3300) / 1100);
+    else v = 0.14 + 0.012 * Math.sin(t * 0.012);
+    const a = Math.PI + v * Math.PI, cos = Math.cos(a), sin = Math.sin(a);
+    g.strokeStyle = '#ee8695'; g.shadowColor = '#ee8695'; g.shadowBlur = 8; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(cx + cos * 8, cy + sin * 8); g.lineTo(cx + cos * (R - 3), cy + sin * (R - 3)); g.stroke();
+    g.fillStyle = '#e8c89a'; g.shadowColor = '#e8c89a'; g.beginPath(); g.arc(cx, cy, 3, 0, 7); g.fill();
+  }
+  g.shadowBlur = 0;
+}
 
 function bootFrame(t0) {
   return function loop(now) {
     const t = now - t0;
     bootRAF = requestAnimationFrame(loop);
 
-    // logo: flicker on, then slow breathing glow
-    if (t < 600) logoFrame.style.opacity = Math.random() < t / 600 ? 1 : 0.08;
-    else { logoFrame.style.opacity = 1; const g = 14 + 10 * Math.sin(t * 0.006); logoFrame.style.filter = `drop-shadow(0 0 ${g}px rgba(238,134,149,${0.25 + 0.15 * Math.sin(t * 0.006)}))`; }
+    // logo: power-cycle dip, then slow fade up and a breathing champagne glow
+    logoFrame.style.opacity = t < 300 ? 1 - 0.95 * (t / 300) : 0.05 + 0.95 * smooth(clamp((t - 300) / 1500));
+    const br = 0.5 + 0.5 * Math.sin(t * 0.004);
+    logoFrame.style.filter = `drop-shadow(0 0 ${12 + 14 * br}px rgba(232,200,154,${0.12 + 0.14 * br}))`;
 
-    // terminal log, typed character by character
+    // headlight streaks sweep across the screen twice
+    const s1 = (t - 500) / 1300, s2 = (t - 5700) / 1000;
+    const p = s1 >= 0 && s1 <= 1 ? s1 : s2 >= 0 && s2 <= 1 ? s2 : -1;
+    $('streak').style.opacity = p < 0 ? 0 : 1;
+    if (p >= 0) $('streak').style.left = (p * 150 - 30) + '%';
+
+    // terminal log (last 6 lines), typed out
     const lines = [];
     for (const [at, label, status] of LOG) {
       if (t < at) break;
-      const full = label.padEnd(26, '.') + ' ' + status;
-      lines.push('> ' + full.slice(0, Math.floor((t - at) / 16)));
+      lines.push('> ' + (label.padEnd(26, '.') + ' ' + status).slice(0, Math.floor((t - at) / 16)));
     }
     if (lines.length && Math.floor(t / 300) % 2) lines[lines.length - 1] += '_';
-    $('bootLog').textContent = lines.join('\n');
+    $('bootLog').textContent = lines.slice(-6).join('\n');
 
-    // lamp-test bars: rolling wave, left-to-right sweep, then staggered drop
+    drawGauge(t);
+
+    // lamp-test bars: wave, left-to-right sweep, staggered drop
     const maxH = bootCanvas._h - 18;
     for (let i = 0; i < BARS; i++) {
       let f = 0;
-      if (t > 700 && t < 2700) f = (0.5 + 0.5 * Math.sin((t - 700) * 0.007 - i * 0.55)) * clamp((t - 700) / 600) * 0.85;
-      else if (t >= 2700 && t < 3700) f = clamp(((t - 2700) / 1000) * (BARS + 3) - i);
-      else if (t >= 3700) f = clamp(1 - (t - 3700 - i * 30) / 420);
+      if (t > 3000 && t < 5000) f = (0.5 + 0.5 * Math.sin((t - 3000) * 0.006 - i * 0.55)) * clamp((t - 3000) / 600) * 0.85;
+      else if (t >= 5000 && t < 5900) f = clamp(((t - 5000) / 900) * (BARS + 3) - i);
+      else if (t >= 5900) f = clamp(1 - (t - 5900 - i * 30) / 420);
       heights[i] = f * maxH; peaks[i] = f * maxH;
     }
     drawBars(bootCanvas, bctx, heights, peaks);
 
-    // progress
-    const e = clamp(t / DUR);
-    let pct = Math.floor((e * e * (3 - 2 * e)) * 100);
-    if (t >= DUR && !micReady) { pct = 99; $('status-line').textContent = 'AWAITING_MIC_ACCESS'; }
-    pct = Math.min(pct, micReady || t < DUR ? 100 : 99);
+    $('welcome').style.opacity = clamp((t - 5900) / 700);
+
+    const pct = Math.floor(smooth(clamp(t / DUR)) * 100);
     $('progress-fill').style.width = pct + '%';
     $('pct-display').textContent = String(pct).padStart(2, '0') + '%';
-    if (!(t >= DUR && !micReady)) { let s = STAGES[0][1]; for (const [p, txt] of STAGES) if (pct >= p) s = txt; $('status-line').textContent = s; }
+    let st = STAGES[0][1]; for (const [q, txt] of STAGES) if (pct >= q) st = txt;
+    $('status-line').textContent = st;
 
-    if (t >= DUR && micReady) { cancelAnimationFrame(bootRAF); finishBoot(); }
+    if (t >= DUR) { cancelAnimationFrame(bootRAF); finishBoot(); }
   };
 }
 
@@ -250,20 +297,17 @@ function finishBoot() {
   }, 180);
 }
 
-/* ---------- start (must run inside the tap for iOS) ---------- */
+/* ---------- start: ask for the mic FIRST, boot only once it's granted ---------- */
 overlay.addEventListener('click', async () => {
   if (isInitialized || isBooting) return;
   isBooting = true;
-  resizeAll();
-  overlay.classList.add('booting'); overlay.classList.add('overlay-booting');
-  document.body.classList.add('overlay-booting');
-  $('start-prompt').style.display = 'none';
-  $('sys-status').textContent = 'SYS_BOOT';
+  $('start-prompt').textContent = '[ allow microphone access ]';
+  $('sys-status').textContent = 'SYS_WAIT';
+  $('status-line').textContent = 'AWAITING_MIC_ACCESS';
 
-  // 'interactive' asks the OS for the smallest audio buffer
+  // created inside the tap so iOS lets it run; 'interactive' = smallest buffer
   audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
   audioCtx.resume();
-  bootRAF = requestAnimationFrame(bootFrame(performance.now()));
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -271,8 +315,8 @@ overlay.addEventListener('click', async () => {
       video: false
     });
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 1024;               // finer bass resolution than 512
-    analyser.smoothingTimeConstant = 0;    // no built-in averaging
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0;
     analyser.minDecibels = -88; analyser.maxDecibels = -22;
     audioCtx.createMediaStreamSource(stream).connect(analyser);
     dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -283,16 +327,21 @@ overlay.addEventListener('click', async () => {
     });
     micReady = true;
   } catch (err) {
-    cancelAnimationFrame(bootRAF);
     alert('Microphone permission is required to analyze audio.');
     console.error(err);
     isBooting = false;
-    overlay.classList.remove('booting'); document.body.classList.remove('overlay-booting');
-    $('start-prompt').style.display = 'block';
+    $('start-prompt').textContent = '[ tap screen to initialize ]';
     $('sys-status').textContent = 'SYS_OFF'; $('status-line').textContent = 'READY TO INITIALIZE';
-    $('progress-fill').style.width = '0%'; $('pct-display').textContent = '00%';
-    $('bootLog').textContent = ''; logoFrame.style.opacity = 1;
+    return;
   }
+
+  // permission granted: now the show starts
+  $('start-prompt').style.display = 'none';
+  overlay.classList.add('booting', 'overlay-booting');
+  document.body.classList.add('overlay-booting');
+  $('sys-status').textContent = 'SYS_BOOT';
+  resizeAll();   // canvases only have a size once the boot stage is visible
+  bootRAF = requestAnimationFrame(bootFrame(performance.now()));
 });
 
 /* ---------- live analyzer ---------- */
