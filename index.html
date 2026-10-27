@@ -1,632 +1,331 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Voyager Audio Works - Spectrum Analyzer</title>
-    <link rel="apple-touch-icon" href="IMG_3897.jpeg">
-    <link rel="icon" type="image/png" href="IMG_3897.jpeg">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        body, html {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            background-color: #050406;
-            font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Voyager Audio Works - Spectrum Analyzer</title>
+<link rel="apple-touch-icon" href="IMG_3897.jpeg">
+<link rel="icon" type="image/png" href="IMG_3897.jpeg">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+body,html{width:100vw;height:100vh;height:100dvh;background:#050406;font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif;overflow:hidden;display:flex;justify-content:center;align-items:center}
+.vfd-container{width:100vw;height:100vh;height:100dvh;background:radial-gradient(circle at center,#151316 0%,#0c0b0e 85%,#050406 100%);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;gap:8px;
+padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.chassis-screw{position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#3a3237 0%,#151214 90%);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 2px rgba(0,0,0,.8);z-index:30}
+.chassis-screw::after{content:"";position:absolute;top:3px;left:1px;width:6px;height:1px;background:rgba(0,0,0,.8)}
+.screw-tl{top:6px;left:6px}.screw-tr{top:6px;right:6px}.screw-bl{bottom:6px;left:6px}.screw-br{bottom:6px;right:6px}
+.vfd-container::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.45) 50%),radial-gradient(circle,rgba(238,134,149,.02) 1px,transparent 1px);background-size:100% 3px,4px 4px;z-index:40;pointer-events:none;opacity:.85}
+.vfd-header{height:34px;display:flex;justify-content:space-between;align-items:center;gap:8px;z-index:4}
+.faceplate-bay{background:#080709;border:1px solid rgba(119,58,77,.25);border-top-color:rgba(0,0,0,.85);border-left-color:rgba(0,0,0,.85);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.03);display:flex;align-items:center;padding:0 10px}
+.name-bay{height:100%;flex:0 1 auto;gap:8px}
+.status-led{width:5px;height:5px;border-radius:50%;background:#ee8695;box-shadow:0 0 6px #ee8695}
+.device-name{font-size:9px;letter-spacing:2px;color:rgba(238,134,149,.65);font-weight:600;text-transform:uppercase}
+.header-vent-bay{height:100%;flex:1 1 auto;max-width:140px;justify-content:space-evenly;padding:0 8px;background:#060507}
+.vent-slat{width:2px;height:16px;background:rgba(0,0,0,.9);border-right:1px solid rgba(119,58,77,.3)}
+.clock-bay{height:100%;flex:0 0 auto}
+.time-display{font-size:9px;letter-spacing:1.5px;color:rgba(207,120,98,.55);font-family:monospace}
+.vis-container{flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;z-index:2;overflow:hidden;padding:4px}
+#visCanvas{position:absolute;top:0;left:0;width:100%;height:100%}
+.freq-legend{position:absolute;bottom:2px;left:8px;right:8px;display:flex;justify-content:space-between;font-family:monospace;font-size:6.5px;color:rgba(119,58,77,.6);pointer-events:none;z-index:3;letter-spacing:.5px}
 
-        /* Hardware Chassis Frame */
-        .vfd-container {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            background: radial-gradient(circle at center, #151316 0%, #0c0b0e 85%, #050406 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            gap: 8px;
-            padding-top: max(12px, env(safe-area-inset-top));
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-            padding-left: max(12px, env(safe-area-inset-left));
-            padding-right: max(12px, env(safe-area-inset-right));
-        }
+/* Power-on flicker for the main faceplate */
+.vfd-container.off .vfd-header .faceplate-bay,.vfd-container.off .vis-container{opacity:0}
+@keyframes flick{0%{opacity:0}8%{opacity:.9}14%{opacity:.1}26%{opacity:1}34%{opacity:.35}46%{opacity:1}100%{opacity:1}}
+.vfd-container.on .vfd-header .faceplate-bay{animation:flick .7s both}
+.vfd-container.on .vfd-header .faceplate-bay:nth-child(2){animation-delay:.12s}
+.vfd-container.on .vfd-header .faceplate-bay:nth-child(3){animation-delay:.24s}
+.vfd-container.on .vis-container{animation:flick .9s .3s both}
 
-        /* Industrial Chassis Screws */
-        .chassis-screw {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #3a3237 0%, #151214 90%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
-            z-index: 10;
-        }
-        .chassis-screw::after {
-            content: "";
-            position: absolute;
-            top: 3px; left: 1px; width: 6px; height: 1px;
-            background: rgba(0,0,0,0.8);
-        }
-        .screw-tl { top: 6px; left: 6px; }
-        .screw-tr { top: 6px; right: 6px; }
-        .screw-bl { bottom: 6px; left: 6px; }
-        .screw-br { bottom: 6px; right: 6px; }
-
-        /* CRT Scanline Overlay */
-        .vfd-container::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.45) 50%),
-                radial-gradient(circle, rgba(238, 134, 149, 0.02) 1px, transparent 1px);
-            background-size: 100% 3px, 4px 4px;
-            z-index: 6;
-            pointer-events: none;
-            opacity: 0.85;
-        }
-
-        /* Top Faceplate Header Bar */
-        .vfd-header {
-            height: 34px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            z-index: 4;
-        }
-
-        /* Recessed Faceplate Bays */
-        .faceplate-bay {
-            background: #080709;
-            border: 1px solid rgba(119, 58, 77, 0.25);
-            border-top-color: rgba(0, 0, 0, 0.85);
-            border-left-color: rgba(0, 0, 0, 0.85);
-            border-radius: 3px;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.03);
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-        }
-
-        .name-bay {
-            height: 100%;
-            flex: 0 1 auto;
-            gap: 8px;
-        }
-
-        .status-led {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: #ee8695;
-            box-shadow: 0 0 6px #ee8695;
-        }
-
-        .device-name {
-            font-size: 9px;
-            letter-spacing: 2px;
-            color: rgba(238, 134, 149, 0.65);
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .header-vent-bay {
-            height: 100%;
-            flex: 1 1 auto;
-            max-width: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: space-evenly;
-            padding: 0 8px;
-            background: #060507;
-        }
-
-        .vent-slat {
-            width: 2px;
-            height: 16px;
-            background: rgba(0, 0, 0, 0.9);
-            border-right: 1px solid rgba(119, 58, 77, 0.3);
-            box-shadow: inset 1px 0 1px rgba(0,0,0,0.9);
-        }
-
-        .clock-bay {
-            height: 100%;
-            flex: 0 0 auto;
-        }
-
-        .time-display {
-            font-size: 9px;
-            letter-spacing: 1.5px;
-            color: rgba(207, 120, 98, 0.55);
-            font-family: monospace;
-        }
-
-        /* Visualizer Screen Canvas */
-        .vis-container {
-            flex: 1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            z-index: 2;
-            overflow: hidden;
-            padding: 4px;
-        }
-
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .freq-legend {
-            position: absolute;
-            bottom: 2px;
-            left: 8px;
-            right: 8px;
-            display: flex;
-            justify-content: space-between;
-            font-family: monospace;
-            font-size: 6.5px;
-            color: rgba(119, 58, 77, 0.6);
-            pointer-events: none;
-            z-index: 3;
-            letter-spacing: 0.5px;
-        }
-
-        /* Startup Screen Overlay */
-        #overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #050406;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 20;
-            cursor: pointer;
-            padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
-        }
-
-        .center-branding {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            width: 100%;
-            max-width: 520px;
-        }
-
-        /* Embedded Exact Raster Logo Graphic */
-        .exact-logo-frame {
-            width: 88%;
-            max-width: 440px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 12px;
-            filter: drop-shadow(0 0 16px rgba(238, 134, 149, 0.25));
-        }
-
-        .exact-logo-frame img {
-            width: 100%;
-            height: auto;
-            max-height: 52vh;
-            object-fit: contain;
-            display: block;
-            border-radius: 4px;
-        }
-
-        .brand-title-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            margin-top: 6px;
-        }
-
-        .brand-main-title {
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 5px;
-            color: #ee8695;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(238, 134, 149, 0.4);
-        }
-
-        .brand-sub-title {
-            font-size: 9px;
-            font-weight: 500;
-            letter-spacing: 4px;
-            color: #cf7862;
-            text-transform: uppercase;
-        }
-
-        .brand-copyright {
-            font-size: 8px;
-            letter-spacing: 2px;
-            color: rgba(207, 120, 98, 0.5);
-            font-family: monospace;
-            margin-top: 8px;
-        }
-
-        .start-prompt {
-            margin-top: 16px;
-            font-size: 9px;
-            letter-spacing: 2.5px;
-            color: rgba(238, 134, 149, 0.7);
-            text-transform: uppercase;
-            animation: pulse-glow 2s infinite ease-in-out;
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.35; }
-            50% { opacity: 0.95; }
-        }
-
-        /* Bottom Readout Status Bar */
-        .status-bar-container {
-            width: 100%;
-            max-width: 520px;
-            background: rgba(12, 10, 13, 0.95);
-            border: 1px solid rgba(119, 58, 77, 0.3);
-            border-radius: 4px;
-            padding: 10px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9), 0 2px 12px rgba(0,0,0,0.6);
-        }
-
-        .status-readouts {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: monospace;
-            font-size: 8.5px;
-            letter-spacing: 1.5px;
-            color: rgba(207, 120, 98, 0.85);
-            text-transform: uppercase;
-        }
-
-        .status-readouts span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-indicator {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: #ee8695;
-            box-shadow: 0 0 6px #ee8695;
-        }
-
-        .boot-progress-bar {
-            width: 100%;
-            height: 5px;
-            background: rgba(45, 26, 38, 0.7);
-            border: 1px solid rgba(119, 58, 77, 0.25);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .boot-progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #543246 0%, #773a4d 40%, #cf7862 75%, #ee8695 100%);
-            box-shadow: 0 0 10px rgba(238, 134, 149, 0.8);
-            transition: width 0.1s linear;
-        }
-    </style>
+/* Boot overlay */
+#overlay{position:absolute;inset:0;background:#050406;display:flex;flex-direction:column;justify-content:space-between;align-items:center;z-index:20;cursor:pointer;
+padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+transition:opacity .45s ease,transform .45s ease}
+#overlay.out{opacity:0;transform:scale(1.05);pointer-events:none}
+#overlay::after{content:"";position:absolute;left:0;right:0;height:2px;top:-4px;background:linear-gradient(90deg,transparent,rgba(238,134,149,.7),transparent);box-shadow:0 0 14px rgba(238,134,149,.6);opacity:0}
+#overlay.booting::after{opacity:1;animation:sweep 2.4s linear infinite}
+@keyframes sweep{to{top:100%}}
+#flash{position:absolute;inset:0;background:radial-gradient(circle,#ee8695 0%,rgba(207,120,98,.4) 40%,transparent 75%);opacity:0;pointer-events:none;z-index:25}
+#flash.go{animation:flashgo .5s ease-out}
+@keyframes flashgo{0%{opacity:.85}100%{opacity:0}}
+.center-branding{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;width:100%;max-width:520px;min-height:0}
+.exact-logo-frame{width:80%;max-width:400px;display:flex;justify-content:center;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(238,134,149,.25))}
+.exact-logo-frame img{width:100%;height:auto;max-height:32vh;object-fit:contain;display:block;border-radius:4px}
+.brand-title-group{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:4px}
+.brand-main-title{font-size:14px;font-weight:700;letter-spacing:5px;color:#ee8695;text-transform:uppercase;text-shadow:0 0 10px rgba(238,134,149,.4)}
+.brand-sub-title{font-size:9px;font-weight:500;letter-spacing:4px;color:#cf7862;text-transform:uppercase}
+.brand-copyright{font-size:8px;letter-spacing:2px;color:rgba(207,120,98,.5);font-family:monospace;margin-top:8px}
+.start-prompt{margin-top:16px;font-size:9px;letter-spacing:2.5px;color:rgba(238,134,149,.7);text-transform:uppercase;animation:pulse-glow 2s infinite ease-in-out}
+@keyframes pulse-glow{0%,100%{opacity:.35}50%{opacity:.95}}
+.boot-stage{width:100%;margin-top:12px;display:none}
+.overlay-booting .boot-stage{display:block}
+#bootCanvas{width:100%;height:68px;display:block;background:#080709;border:1px solid rgba(119,58,77,.25);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
+#bootLog{margin-top:8px;font-family:monospace;font-size:8px;letter-spacing:1px;line-height:1.55;color:rgba(207,120,98,.8);text-align:left;white-space:pre;height:calc(8px*1.55*6);overflow:hidden;padding:0 4px}
+.status-bar-container{width:100%;max-width:520px;background:rgba(12,10,13,.95);border:1px solid rgba(119,58,77,.3);border-radius:4px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 2px 12px rgba(0,0,0,.6)}
+.status-readouts{display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:8.5px;letter-spacing:1.5px;color:rgba(207,120,98,.85);text-transform:uppercase}
+.status-readouts span{display:flex;align-items:center;gap:6px}
+.status-indicator{width:5px;height:5px;border-radius:50%;background:#ee8695;box-shadow:0 0 6px #ee8695}
+.overlay-booting .status-indicator{animation:pulse-glow .5s infinite}
+.boot-progress-bar{width:100%;height:5px;background:rgba(45,26,38,.7);border:1px solid rgba(119,58,77,.25);border-radius:2px;overflow:hidden}
+.boot-progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#543246,#773a4d 40%,#cf7862 75%,#ee8695);box-shadow:0 0 10px rgba(238,134,149,.8)}
+</style>
 </head>
 <body>
+<div class="vfd-container off" id="chassis">
+  <div class="chassis-screw screw-tl"></div><div class="chassis-screw screw-tr"></div>
+  <div class="chassis-screw screw-bl"></div><div class="chassis-screw screw-br"></div>
 
-    <div class="vfd-container">
-        <!-- Hardware Screws -->
-        <div class="chassis-screw screw-tl"></div>
-        <div class="chassis-screw screw-tr"></div>
-        <div class="chassis-screw screw-bl"></div>
-        <div class="chassis-screw screw-br"></div>
-
-        <!-- Startup Screen Overlay with Exact Logo Artwork -->
-        <div id="overlay">
-            <div class="center-branding">
-                
-                <div class="exact-logo-frame">
-                    <img src="logo.png" alt="Voyager Audio Works Logo">
-                </div>
-
-                <div class="brand-title-group">
-                    <div class="brand-main-title">Voyager</div>
-                    <div class="brand-sub-title">Audio Works</div>
-                </div>
-
-                <div class="brand-copyright">MODEL VAW-80 // FREQUENCY SPECTRUM ANALYZER</div>
-                <div class="start-prompt" id="start-prompt">[ tap screen to initialize ]</div>
-            </div>
-
-            <!-- Bottom Status Progress Bar -->
-            <div class="status-bar-container">
-                <div class="status-readouts">
-                    <span><i class="status-indicator"></i><span id="sys-status">SYS_OFF</span></span>
-                    <span id="status-line">READY TO INITIALIZE</span>
-                    <span id="pct-display">00%</span>
-                </div>
-                <div class="boot-progress-bar">
-                    <div class="boot-progress-fill" id="progress-fill"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Visualizer Top Header Frame -->
-        <div class="vfd-header">
-            <div class="faceplate-bay name-bay">
-                <div class="status-led"></div>
-                <div class="device-name">Voyager Audio Works</div>
-            </div>
-            
-            <div class="faceplate-bay header-vent-bay">
-                <div class="vent-slat"></div>
-                <div class="vent-slat"></div>
-                <div class="vent-slat"></div>
-                <div class="vent-slat"></div>
-                <div class="vent-slat"></div>
-                <div class="vent-slat"></div>
-                <div class="vent-slat"></div>
-                <div class="vent-slat"></div>
-            </div>
-
-            <div class="faceplate-bay clock-bay">
-                <div class="time-display" id="time-display">00:00:00</div>
-            </div>
-        </div>
-
-        <!-- Spectrum Analyzer Canvas -->
-        <div class="vis-container faceplate-bay">
-            <canvas id="visCanvas"></canvas>
-            <div class="freq-legend">
-                <span>30Hz</span><span>80</span><span>180</span><span>320</span><span>600</span><span>1k</span><span>1.8k</span><span>2.8k</span><span>4.2k</span><span>6k</span><span>8.5k</span><span>16kHz</span>
-            </div>
-        </div>
+  <div id="overlay">
+    <div id="flash"></div>
+    <div class="center-branding">
+      <div class="exact-logo-frame" id="logoFrame"><img src="logo.png" alt="Voyager Audio Works Logo"></div>
+      <div class="brand-title-group">
+        <div class="brand-main-title">Voyager</div>
+        <div class="brand-sub-title">Audio Works</div>
+      </div>
+      <div class="brand-copyright">MODEL VAW-80 // FREQUENCY SPECTRUM ANALYZER</div>
+      <div class="start-prompt" id="start-prompt">[ tap screen to initialize ]</div>
+      <div class="boot-stage">
+        <canvas id="bootCanvas"></canvas>
+        <div id="bootLog"></div>
+      </div>
     </div>
+    <div class="status-bar-container">
+      <div class="status-readouts">
+        <span><i class="status-indicator"></i><span id="sys-status">SYS_OFF</span></span>
+        <span id="status-line">READY TO INITIALIZE</span>
+        <span id="pct-display">00%</span>
+      </div>
+      <div class="boot-progress-bar"><div class="boot-progress-fill" id="progress-fill"></div></div>
+    </div>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('visCanvas');
-        const ctx = canvas.getContext('2d');
-        const overlay = document.getElementById('overlay');
-        const startPrompt = document.getElementById('start-prompt');
-        const sysStatus = document.getElementById('sys-status');
-        const statusLine = document.getElementById('status-line');
-        const pctDisplay = document.getElementById('pct-display');
-        const progressFill = document.getElementById('progress-fill');
-        const timeEl = document.getElementById('time-display');
+  <div class="vfd-header">
+    <div class="faceplate-bay name-bay"><div class="status-led"></div><div class="device-name">Voyager Audio Works</div></div>
+    <div class="faceplate-bay header-vent-bay">
+      <div class="vent-slat"></div><div class="vent-slat"></div><div class="vent-slat"></div><div class="vent-slat"></div>
+      <div class="vent-slat"></div><div class="vent-slat"></div><div class="vent-slat"></div><div class="vent-slat"></div>
+    </div>
+    <div class="faceplate-bay clock-bay"><div class="time-display" id="time-display">00:00:00</div></div>
+  </div>
 
-        // Clock Update
-        setInterval(() => {
-            const now = new Date();
-            timeEl.textContent = now.toTimeString().split(' ')[0];
-        }, 1000);
+  <div class="vis-container faceplate-bay">
+    <canvas id="visCanvas"></canvas>
+    <div class="freq-legend">
+      <span>30Hz</span><span>80</span><span>180</span><span>320</span><span>600</span><span>1k</span><span>1.8k</span><span>2.8k</span><span>4.2k</span><span>6k</span><span>8.5k</span><span>16kHz</span>
+    </div>
+  </div>
+</div>
 
-        let audioCtx, analyser, microphone, dataArray;
-        let isInitialized = false;
-        let isBooting = false;
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $('visCanvas'), ctx = canvas.getContext('2d');
+const bootCanvas = $('bootCanvas'), bctx = bootCanvas.getContext('2d');
+const overlay = $('overlay'), chassis = $('chassis'), logoFrame = $('logoFrame');
 
-        const BARS_COUNT = 12;
-        let currentHeights = new Array(BARS_COUNT).fill(0);
-        let peakHeights = new Array(BARS_COUNT).fill(0);
-        let peakHoldTimers = new Array(BARS_COUNT).fill(0);
+setInterval(() => { $('time-display').textContent = new Date().toTimeString().split(' ')[0]; }, 1000);
 
-        const FREQ_BOUNDS = [
-            [30, 80], [80, 180], [180, 320], [320, 600],
-            [600, 1000], [1000, 1800], [1800, 2800], [2800, 4200],
-            [4200, 6000], [6000, 8500], [8500, 12000], [12000, 16000]
-        ];
+const BARS = 12;
+const FREQ_BOUNDS = [[30,80],[80,180],[180,320],[320,600],[600,1000],[1000,1800],[1800,2800],[2800,4200],[4200,6000],[6000,8500],[8500,12000],[12000,16000]];
+const COLORS = ['#543246','#773a4d','#a75252','#cf7862','#ee8695'];
+const BLOCK_H = 4, BLOCK_GAP = 2.3, STEP = BLOCK_H + BLOCK_GAP;
 
-        overlay.addEventListener('click', async () => {
-            if (isInitialized || isBooting) return;
-            isBooting = true;
+let audioCtx, analyser, dataArray, binRanges;
+let isInitialized = false, isBooting = false, micReady = false, bootRAF = 0;
 
-            startPrompt.style.display = 'none';
-            sysStatus.textContent = "SYS_BOOT";
+const heights = new Float32Array(BARS), peaks = new Float32Array(BARS), peakTimers = new Float32Array(BARS), prevTarget = new Float32Array(BARS);
 
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: false,
-                        autoGainControl: false,
-                        noiseSuppression: false
-                    }, 
-                    video: false 
-                });
+/* ---------- canvas helpers (retina-aware) ---------- */
+function setupCanvas(c, cx) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c._w = c.clientWidth; c._h = c.clientHeight;
+  c.width = Math.round(c._w * dpr); c.height = Math.round(c._h * dpr);
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function resizeAll() { setupCanvas(canvas, ctx); setupCanvas(bootCanvas, bctx); }
+window.addEventListener('resize', resizeAll);
 
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                microphone = audioCtx.createMediaStreamSource(stream);
-                
-                analyser.fftSize = 512; 
-                analyser.smoothingTimeConstant = 0.08; 
-                microphone.connect(analyser);
-                
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
+/* Shared renderer: no per-segment shadowBlur (that was a big source of frame lag on iOS).
+   Segments are batched into one path per colour, and glow is faked with translucent rects. */
+function drawBars(c, cx, hts, pks) {
+  const w = c._w, h = c._h;
+  cx.clearRect(0, 0, w, h);
+  const padX = 8, avail = w - padX * 2;
+  const gap = Math.max(2, Math.floor(avail * 0.015 * 0.65));
+  const bw = Math.floor((avail - gap * (BARS - 1)) / BARS);
+  const baseY = h - 14, maxH = h - 18, maxSeg = Math.floor(maxH / STEP);
 
-                const bootSteps = [
-                    { pct: 20, text: "BUS_INITIALIZING" },
-                    { pct: 45, text: "CALIBRATING_DSP" },
-                    { pct: 75, text: "ANALOG_LOCK_OK" },
-                    { pct: 100, text: "SYSTEM_ONLINE" }
-                ];
+  const ghost = new Path2D();
+  const paths = COLORS.map(() => new Path2D());
+  const glow = new Path2D(), caps = new Path2D();
+  let x = padX;
+  for (let i = 0; i < BARS; i++) {
+    for (let s = 0; s < maxSeg; s++) ghost.rect(x, baseY - s * STEP, bw, BLOCK_H);
+    const active = Math.floor(hts[i] / STEP);
+    for (let s = 0; s < active; s++) {
+      const r = s / maxSeg;
+      const ci = r < .35 ? 0 : r < .60 ? 1 : r < .80 ? 2 : r < .92 ? 3 : 4;
+      paths[ci].rect(x, baseY - s * STEP, bw, BLOCK_H);
+    }
+    if (active > 0) {
+      const ty = baseY - (active - 1) * STEP;
+      glow.rect(x - 2, ty - 3, bw + 4, BLOCK_H + 6);
+    }
+    if (pks[i] > 2) caps.rect(x, baseY - pks[i], bw, 2);
+    x += bw + gap;
+  }
+  cx.fillStyle = 'rgba(84,50,70,0.16)'; cx.fill(ghost);
+  cx.fillStyle = 'rgba(238,134,149,0.18)'; cx.fill(glow);
+  COLORS.forEach((col, i) => { cx.fillStyle = col; cx.fill(paths[i]); });
+  cx.fillStyle = '#ee8695'; cx.fill(caps);
+}
 
-                let currentStep = 0;
-                let progress = 0;
+/* ---------- boot sequence ---------- */
+const DUR = 4700;
+const LOG = [
+  [250,  'VAW-80 FIRMWARE 2.4',      'OK'],
+  [850,  'MIC BUS HANDSHAKE',        'LOCK'],
+  [1450, 'DSP CORE CALIBRATION',     'OK'],
+  [2050, '1024-PT FFT / 12 BAND',    'OK'],
+  [2700, 'VFD SEGMENT TEST',         'RUN'],
+  [3650, 'ANALOG OUTPUT STAGE',      'READY']
+];
+const STAGES = [[0,'COLD_START'],[18,'BUS_INITIALIZING'],[40,'CALIBRATING_DSP'],[62,'SEGMENT_TEST'],[85,'ANALOG_LOCK_OK'],[100,'SYSTEM_ONLINE']];
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
-                const bootInterval = setInterval(() => {
-                    progress += 1;
-                    progressFill.style.width = `${progress}%`;
-                    pctDisplay.textContent = `${String(progress).padStart(2, '0')}%`;
+function bootFrame(t0) {
+  return function loop(now) {
+    const t = now - t0;
+    bootRAF = requestAnimationFrame(loop);
 
-                    if (currentStep < bootSteps.length && progress >= bootSteps[currentStep].pct) {
-                        statusLine.textContent = bootSteps[currentStep].text;
-                        currentStep++;
-                    }
+    // logo: flicker on, then slow breathing glow
+    if (t < 600) logoFrame.style.opacity = Math.random() < t / 600 ? 1 : 0.08;
+    else { logoFrame.style.opacity = 1; const g = 14 + 10 * Math.sin(t * 0.006); logoFrame.style.filter = `drop-shadow(0 0 ${g}px rgba(238,134,149,${0.25 + 0.15 * Math.sin(t * 0.006)}))`; }
 
-                    if (progress >= 100) {
-                        clearInterval(bootInterval);
-                        setTimeout(finishInitialization, 250);
-                    }
-                }, 30);
+    // terminal log, typed character by character
+    const lines = [];
+    for (const [at, label, status] of LOG) {
+      if (t < at) break;
+      const full = label.padEnd(26, '.') + ' ' + status;
+      lines.push('> ' + full.slice(0, Math.floor((t - at) / 16)));
+    }
+    if (lines.length && Math.floor(t / 300) % 2) lines[lines.length - 1] += '_';
+    $('bootLog').textContent = lines.join('\n');
 
-            } catch (err) {
-                alert('Microphone permission is required to analyze audio.');
-                console.error(err);
-                isBooting = false;
-                startPrompt.style.display = 'block';
-                sysStatus.textContent = "SYS_OFF";
-                statusLine.textContent = "READY TO INITIALIZE";
-            }
-        });
+    // lamp-test bars: rolling wave, left-to-right sweep, then staggered drop
+    const maxH = bootCanvas._h - 18;
+    for (let i = 0; i < BARS; i++) {
+      let f = 0;
+      if (t > 700 && t < 2700) f = (0.5 + 0.5 * Math.sin((t - 700) * 0.007 - i * 0.55)) * clamp((t - 700) / 600) * 0.85;
+      else if (t >= 2700 && t < 3700) f = clamp(((t - 2700) / 1000) * (BARS + 3) - i);
+      else if (t >= 3700) f = clamp(1 - (t - 3700 - i * 30) / 420);
+      heights[i] = f * maxH; peaks[i] = f * maxH;
+    }
+    drawBars(bootCanvas, bctx, heights, peaks);
 
-        function finishInitialization() {
-            isInitialized = true;
-            overlay.style.display = 'none';
-            resizeCanvas();
-            animate();
-        }
+    // progress
+    const e = clamp(t / DUR);
+    let pct = Math.floor((e * e * (3 - 2 * e)) * 100);
+    if (t >= DUR && !micReady) { pct = 99; $('status-line').textContent = 'AWAITING_MIC_ACCESS'; }
+    pct = Math.min(pct, micReady || t < DUR ? 100 : 99);
+    $('progress-fill').style.width = pct + '%';
+    $('pct-display').textContent = String(pct).padStart(2, '0') + '%';
+    if (!(t >= DUR && !micReady)) { let s = STAGES[0][1]; for (const [p, txt] of STAGES) if (pct >= p) s = txt; $('status-line').textContent = s; }
 
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
+    if (t >= DUR && micReady) { cancelAnimationFrame(bootRAF); finishBoot(); }
+  };
+}
 
-        function animate() {
-            requestAnimationFrame(animate);
-            if (!isInitialized) return;
+function finishBoot() {
+  heights.fill(0); peaks.fill(0);
+  $('sys-status').textContent = 'SYS_ON';
+  $('flash').classList.add('go');
+  setTimeout(() => {
+    overlay.classList.add('out');
+    chassis.classList.remove('off'); chassis.classList.add('on');
+    isInitialized = true;
+    resizeAll();
+    lastT = performance.now();
+    requestAnimationFrame(animate);
+    setTimeout(() => { overlay.style.display = 'none'; }, 500);
+  }, 180);
+}
 
-            analyser.getByteFrequencyData(dataArray);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+/* ---------- start (must run inside the tap for iOS) ---------- */
+overlay.addEventListener('click', async () => {
+  if (isInitialized || isBooting) return;
+  isBooting = true;
+  resizeAll();
+  overlay.classList.add('booting'); overlay.classList.add('overlay-booting');
+  document.body.classList.add('overlay-booting');
+  $('start-prompt').style.display = 'none';
+  $('sys-status').textContent = 'SYS_BOOT';
 
-            const paddingX = 8;
-            const availableWidth = canvas.width - (paddingX * 2);
-            
-            const barGap = Math.max(2, Math.floor(availableWidth * 0.015 * 0.65));
-            const barWidth = Math.floor((availableWidth - (barGap * (BARS_COUNT - 1))) / BARS_COUNT);
-            let x = paddingX;
+  // 'interactive' asks the OS for the smallest audio buffer
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+  audioCtx.resume();
+  bootRAF = requestAnimationFrame(bootFrame(performance.now()));
 
-            const maxHeight = canvas.height - 18;
-            const nyquist = audioCtx.sampleRate / 2;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false, latency: 0 },
+      video: false
+    });
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024;               // finer bass resolution than 512
+    analyser.smoothingTimeConstant = 0;    // no built-in averaging
+    analyser.minDecibels = -88; analyser.maxDecibels = -22;
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const binHz = audioCtx.sampleRate / analyser.fftSize;
+    binRanges = FREQ_BOUNDS.map(([lo, hi]) => {
+      const a = Math.max(1, Math.floor(lo / binHz));
+      return [a, Math.min(Math.max(a, Math.ceil(hi / binHz)), dataArray.length - 1)];
+    });
+    micReady = true;
+  } catch (err) {
+    cancelAnimationFrame(bootRAF);
+    alert('Microphone permission is required to analyze audio.');
+    console.error(err);
+    isBooting = false;
+    overlay.classList.remove('booting'); document.body.classList.remove('overlay-booting');
+    $('start-prompt').style.display = 'block';
+    $('sys-status').textContent = 'SYS_OFF'; $('status-line').textContent = 'READY TO INITIALIZE';
+    $('progress-fill').style.width = '0%'; $('pct-display').textContent = '00%';
+    $('bootLog').textContent = ''; logoFrame.style.opacity = 1;
+  }
+});
 
-            const blockHeight = 4;
-            const blockGap = 2.3; 
-            const maxSegments = Math.floor(maxHeight / (blockHeight + blockGap));
+/* ---------- live analyzer ---------- */
+let lastT = 0;
+function animate(now) {
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  analyser.getByteFrequencyData(dataArray);
 
-            for (let i = 0; i < BARS_COUNT; i++) {
-                const [lowHz, highHz] = FREQ_BOUNDS[i];
-                const lowIndex = Math.floor((lowHz / nyquist) * dataArray.length);
-                const highIndex = Math.min(
-                    Math.ceil((highHz / nyquist) * dataArray.length), 
-                    dataArray.length - 1
-                );
+  const maxH = canvas._h - 18;
+  for (let i = 0; i < BARS; i++) {
+    const [lo, hi] = binRanges[i];
+    let sum = 0, mx = 0;
+    for (let j = lo; j <= hi; j++) { const v = dataArray[j]; sum += v; if (v > mx) mx = v; }
+    // blend of average and max: punchier and more reactive than average alone
+    const raw = 0.5 * (sum / (hi - lo + 1)) + 0.5 * mx;
+    let target = Math.pow(Math.min(255, raw * (1 + i * 0.08)) / 255, 1.15) * maxH;
 
-                let sum = 0;
-                let count = 0;
-                for (let j = lowIndex; j <= highIndex; j++) {
-                    sum += dataArray[j];
-                    count++;
-                }
-                const rawValue = count > 0 ? sum / count : 0;
-                const highBoost = 1 + (i * 0.08);
-                const targetHeight = (Math.min(255, rawValue * highBoost) / 255) * maxHeight;
+    // transient emphasis: sudden rises overshoot a bit so hits feel instant
+    const flux = Math.max(0, target - prevTarget[i]);
+    prevTarget[i] = target;
+    target = Math.min(maxH, target + flux * 0.45);
 
-                if (targetHeight > currentHeights[i]) {
-                    currentHeights[i] = targetHeight; 
-                } else {
-                    currentHeights[i] -= 4.2; 
-                    if (currentHeights[i] < 0) currentHeights[i] = 0;
-                }
+    // instant attack, time-based decay (consistent on 60 / 120 Hz screens)
+    if (target > heights[i]) heights[i] = target;
+    else heights[i] = Math.max(0, heights[i] - (260 + (heights[i] - target) * 6) * dt);
 
-                if (currentHeights[i] > peakHeights[i]) {
-                    peakHeights[i] = currentHeights[i];
-                    peakHoldTimers[i] = 8;
-                } else {
-                    if (peakHoldTimers[i] > 0) {
-                        peakHoldTimers[i]--;
-                    } else {
-                        peakHeights[i] -= 1.4;
-                        if (peakHeights[i] < 0) peakHeights[i] = 0;
-                    }
-                }
-
-                const activeSegments = Math.floor(currentHeights[i] / (blockHeight + blockGap));
-
-                // 1. Unlit Ghost Segments
-                ctx.fillStyle = 'rgba(84, 50, 70, 0.16)';
-                for (let seg = 0; seg < maxSegments; seg++) {
-                    const segY = canvas.height - 14 - (seg * (blockHeight + blockGap));
-                    ctx.fillRect(x, segY, barWidth, blockHeight);
-                }
-
-                // 2. Active Illuminated VFD Segments
-                for (let seg = 0; seg < activeSegments; seg++) {
-                    const segY = canvas.height - 14 - (seg * (blockHeight + blockGap));
-                    const ratio = seg / maxSegments;
-
-                    if (ratio < 0.35) {
-                        ctx.fillStyle = '#543246'; 
-                        ctx.shadowColor = 'rgba(84, 50, 70, 0.3)';
-                    } else if (ratio < 0.60) {
-                        ctx.fillStyle = '#773a4d'; 
-                        ctx.shadowColor = 'rgba(119, 58, 77, 0.4)';
-                    } else if (ratio < 0.80) {
-                        ctx.fillStyle = '#a75252'; 
-                        ctx.shadowColor = 'rgba(167, 82, 82, 0.45)';
-                    } else if (ratio < 0.92) {
-                        ctx.fillStyle = '#cf7862'; 
-                        ctx.shadowColor = 'rgba(207, 120, 98, 0.5)';
-                    } else {
-                        ctx.fillStyle = '#ee8695'; 
-                        ctx.shadowColor = 'rgba(238, 134, 149, 0.6)';
-                    }
-
-                    ctx.shadowBlur = 3;
-                    ctx.fillRect(x, segY, barWidth, blockHeight);
-                }
-
-                // 3. Floating Peak Cap
-                if (peakHeights[i] > 2) {
-                    const peakY = canvas.height - 14 - peakHeights[i];
-                    ctx.fillStyle = '#ee8695';
-                    ctx.shadowColor = '#ee8695';
-                    ctx.shadowBlur = 4;
-                    ctx.fillRect(x, peakY, barWidth, 2);
-                }
-
-                x += barWidth + barGap;
-            }
-
-            ctx.shadowBlur = 0;
-        }
-    </script>
+    if (heights[i] >= peaks[i]) { peaks[i] = heights[i]; peakTimers[i] = 0.13; }
+    else if (peakTimers[i] > 0) peakTimers[i] -= dt;
+    else peaks[i] = Math.max(0, peaks[i] - 90 * dt);
+  }
+  drawBars(canvas, ctx, heights, peaks);
+}
+</script>
 </body>
 </html>
