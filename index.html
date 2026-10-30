@@ -148,7 +148,7 @@ const heights = new Float32Array(BARS), peaks = new Float32Array(BARS), peakTime
 
 /* ---------- canvas helpers (retina-aware) ---------- */
 function setupCanvas(c, cx) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
   c._w = c.clientWidth; c._h = c.clientHeight;
   c.width = Math.round(c._w * dpr); c.height = Math.round(c._h * dpr);
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -156,93 +156,114 @@ function setupCanvas(c, cx) {
 function resizeAll() { setupCanvas(canvas, ctx); setupCanvas(bootCanvas, bctx); setupCanvas(gaugeCanvas, gctx); }
 window.addEventListener('resize', resizeAll);
 
-/* Shared renderer: segmented spectrum + restrained Lissajous display.
-   No per-segment shadowBlur; paths are batched to stay smooth on mobile. */
-function drawBars(c, cx, hts, pks, waveform = null, clock = 0) {
+/* Shared renderer.
+   Boot mode intentionally draws only the lamp-test spectrum. The live-only
+   oscillator and bass meter are enabled after the boot sequence completes. */
+function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false) {
   const w = c._w, h = c._h;
   cx.clearRect(0, 0, w, h);
 
-  // Dark glass, subtle horizontal calibration lines and a faint central axis.
   const bg = cx.createLinearGradient(0, 0, 0, h);
-  bg.addColorStop(0, 'rgba(12,13,27,.96)');
-  bg.addColorStop(.55, 'rgba(13,10,24,.94)');
-  bg.addColorStop(1, 'rgba(5,7,15,.98)');
-  cx.fillStyle = bg; cx.fillRect(0, 0, w, h);
+  bg.addColorStop(0, '#0d1020');
+  bg.addColorStop(.55, '#0b0b18');
+  bg.addColorStop(1, '#050711');
+  cx.fillStyle = bg;
+  cx.fillRect(0, 0, w, h);
 
-  const oscH = Math.max(48, h * .34);
-  const oscTop = 7, oscBottom = oscTop + oscH;
-  const midX = w / 2, midY = oscTop + oscH / 2;
-  cx.strokeStyle = 'rgba(113,119,170,.12)';
-  cx.lineWidth = 1;
-  for (let i = 1; i <= 4; i++) {
-    const y = oscTop + (oscH * i / 5);
-    cx.beginPath(); cx.moveTo(8, y); cx.lineTo(w - 8, y); cx.stroke();
-  }
-  cx.setLineDash([2, 5]);
-  cx.beginPath(); cx.moveTo(midX, oscTop); cx.lineTo(midX, oscBottom); cx.stroke();
-  cx.setLineDash([]);
+  const padX = 8;
+  const avail = w - padX * 2;
 
-  // Lissajous figure: microphone samples drive X and a phase-shifted sample drives Y.
-  // A slow phase drift adds movement even when the incoming signal is steady.
-  const trace = new Path2D();
-  const samples = waveform ? waveform.length : 256;
-  const radiusX = Math.min(w * .31, 190);
-  const radiusY = oscH * .39;
-  const phase = clock * .00032;
-  const points = Math.min(samples, 512);
-  for (let i = 0; i < points; i++) {
-    let x, y;
-    if (waveform) {
-      const a = (waveform[i] - 128) / 128;
-      const j = (i + Math.floor(points * .23)) % points;
-      const b = (waveform[j] - 128) / 128;
-      x = a;
-      y = b * .88 + Math.sin(i / points * Math.PI * 2 + phase) * .08;
-    } else {
-      const a = i / points * Math.PI * 2;
-      x = Math.sin(3 * a + phase);
-      y = Math.sin(4 * a);
+  if (live && waveform) {
+    // Single-line time-domain oscillator.
+    const oscTop = 7;
+    const oscH = Math.max(28, h * .19);
+    const midY = oscTop + oscH / 2;
+    const amp = oscH * .43;
+
+    cx.strokeStyle = 'rgba(111,139,176,.15)';
+    cx.lineWidth = 1;
+    cx.beginPath();
+    cx.moveTo(padX, midY);
+    cx.lineTo(w - padX, midY);
+    cx.stroke();
+
+    cx.strokeStyle = 'rgba(112,132,172,.12)';
+    cx.setLineDash([2, 5]);
+    cx.beginPath();
+    cx.moveTo(padX, oscTop);
+    cx.lineTo(w - padX, oscTop);
+    cx.moveTo(padX, oscTop + oscH);
+    cx.lineTo(w - padX, oscTop + oscH);
+    cx.stroke();
+    cx.setLineDash([]);
+
+    cx.beginPath();
+    const sampleStep = Math.max(1, Math.floor(waveform.length / Math.max(1, avail)));
+    let first = true;
+    for (let i = 0; i < waveform.length; i += sampleStep) {
+      const x = padX + (i / (waveform.length - 1)) * avail;
+      const y = midY + ((waveform[i] - 128) / 128) * amp;
+      if (first) { cx.moveTo(x, y); first = false; }
+      else cx.lineTo(x, y);
     }
-    const px = midX + x * radiusX;
-    const py = midY + y * radiusY;
-    if (i === 0) trace.moveTo(px, py); else trace.lineTo(px, py);
+    cx.lineJoin = 'round';
+    cx.lineCap = 'round';
+    cx.strokeStyle = 'rgba(103,202,216,.16)';
+    cx.lineWidth = 4;
+    cx.stroke();
+    cx.strokeStyle = '#9bcbd5';
+    cx.lineWidth = 1.15;
+    cx.stroke();
+
+    cx.font = '6px monospace';
+    cx.fillStyle = 'rgba(160,180,202,.55)';
+    cx.textAlign = 'left';
+    cx.fillText('SIGNAL / TIME DOMAIN', padX + 2, oscTop + 7);
+
+    // Horizontal low-frequency / bass energy meter.
+    const bassY = oscTop + oscH + 8;
+    const bassH = 5;
+    const bassW = avail;
+    cx.fillStyle = 'rgba(77,75,111,.32)';
+    cx.fillRect(padX, bassY, bassW, bassH);
+    cx.strokeStyle = 'rgba(120,136,177,.24)';
+    cx.strokeRect(padX + .5, bassY + .5, bassW - 1, bassH - 1);
+
+    const level = clamp(bassLevel);
+    const fillW = Math.max(0, bassW * level);
+    const bassGrad = cx.createLinearGradient(padX, 0, padX + bassW, 0);
+    bassGrad.addColorStop(0, '#59618b');
+    bassGrad.addColorStop(.58, '#7d829f');
+    bassGrad.addColorStop(1, '#d69ab5');
+    cx.fillStyle = bassGrad;
+    cx.fillRect(padX + 1, bassY + 1, Math.max(0, fillW - 2), bassH - 2);
+
+    cx.font = '6px monospace';
+    cx.fillStyle = 'rgba(160,180,202,.58)';
+    cx.textAlign = 'left';
+    cx.fillText('LOW / BASS', padX, bassY + 14);
+    cx.textAlign = 'right';
+    cx.fillText('SUB ENERGY', w - padX, bassY + 14);
   }
-  cx.save();
-  cx.beginPath(); cx.rect(6, oscTop, w - 12, oscH); cx.clip();
-  cx.strokeStyle = 'rgba(95,210,220,.13)';
-  cx.lineWidth = 5; cx.stroke(trace);
-  cx.strokeStyle = 'rgba(124,194,213,.76)';
-  cx.lineWidth = 1.15; cx.stroke(trace);
-  cx.strokeStyle = 'rgba(224,151,184,.42)';
-  cx.lineWidth = .65;
-  cx.translate(.8, -.5); cx.stroke(trace);
-  cx.restore();
 
-  // Oscillator frame and tiny instrument labels.
-  cx.strokeStyle = 'rgba(115,126,175,.22)';
-  cx.strokeRect(7.5, oscTop + .5, w - 15, oscH - 1);
-  cx.font = '6px monospace';
-  cx.fillStyle = 'rgba(147,164,194,.52)';
-  cx.textAlign = 'left';
-  cx.fillText('XY / LISSAJOUS', 12, oscTop + 9);
-  cx.textAlign = 'right';
-  cx.fillText('PHASE ' + (Math.round((phase % (Math.PI * 2)) * 57.3)).toString().padStart(3,'0'), w - 12, oscTop + 9);
-
-  // Spectrum occupies the lower portion, leaving the oscillator readable.
-  const padX = 8, avail = w - padX * 2;
+  // Spectrum remains the primary lower display. During boot, it expands to
+  // use the full short lamp-test canvas; live mode reserves room above.
+  const top = live && waveform ? Math.max(oscH + 39, h * .40) : 4;
+  const baseY = h - (live ? 17 : 5);
+  const maxH = Math.max(8, baseY - top);
   const gap = Math.max(1, Math.floor(avail * .006));
-  const bw = Math.max(2, (avail - gap * (BARS - 1)) / BARS);
-  const baseY = h - 12;
-  const spectrumTop = oscBottom + 9;
-  const maxH = Math.max(12, baseY - spectrumTop);
+  const bw = Math.max(1.5, (avail - gap * (BARS - 1)) / BARS);
   const maxSeg = Math.max(1, Math.floor(maxH / STEP));
 
   const ghost = new Path2D();
   const paths = COLORS.map(() => new Path2D());
   const glow = new Path2D(), caps = new Path2D();
   let x = padX;
+
   for (let i = 0; i < BARS; i++) {
-    for (let s = 0; s < maxSeg; s++) ghost.rect(x, baseY - s * STEP, bw, BLOCK_H);
+    for (let s = 0; s < maxSeg; s++) {
+      ghost.rect(x, baseY - s * STEP, bw, BLOCK_H);
+    }
     const active = Math.min(maxSeg, Math.floor(hts[i] / STEP));
     for (let s = 0; s < active; s++) {
       const r = s / maxSeg;
@@ -253,20 +274,26 @@ function drawBars(c, cx, hts, pks, waveform = null, clock = 0) {
       const ty = baseY - (active - 1) * STEP;
       glow.rect(x - 1, ty - 2, bw + 2, BLOCK_H + 4);
     }
-    if (pks[i] > 2) caps.rect(x, baseY - Math.min(maxH, pks[i]), bw, 1.5);
+    if (pks[i] > 2) {
+      caps.rect(x, baseY - Math.min(maxH, pks[i]), bw, 1.5);
+    }
     x += bw + gap;
   }
-  cx.fillStyle = 'rgba(74,74,112,.17)'; cx.fill(ghost);
-  cx.fillStyle = 'rgba(103,185,205,.10)'; cx.fill(glow);
-  COLORS.forEach((col, i) => { cx.fillStyle = col; cx.fill(paths[i]); });
-  cx.fillStyle = '#d6a2bd'; cx.fill(caps);
 
-  // Fine baseline and restrained frequency ticks.
-  cx.fillStyle = 'rgba(132,148,183,.38)';
-  cx.fillRect(padX, baseY + 3, avail, 1);
-  for (let i = 0; i < 12; i++) {
-    const tx = padX + avail * i / 11;
-    cx.fillRect(tx, baseY + 4, 1, i % 3 === 0 ? 4 : 2);
+  cx.fillStyle = 'rgba(74,74,112,.17)';
+  cx.fill(ghost);
+  cx.fillStyle = 'rgba(103,185,205,.10)';
+  cx.fill(glow);
+  COLORS.forEach((col, i) => {
+    cx.fillStyle = col;
+    cx.fill(paths[i]);
+  });
+  cx.fillStyle = '#d6a2bd';
+  cx.fill(caps);
+
+  if (live) {
+    cx.fillStyle = 'rgba(132,148,183,.38)';
+    cx.fillRect(padX, baseY + 3, avail, 1);
   }
 }
 
@@ -327,152 +354,4 @@ function bootFrame(t0) {
     const br = 0.5 + 0.5 * Math.sin(t * 0.004);
     logoFrame.style.filter = `drop-shadow(0 0 ${12 + 14 * br}px rgba(232,200,154,${0.12 + 0.14 * br}))`;
 
-    // headlight streaks sweep across the screen twice
-    const s1 = (t - 500) / 1300, s2 = (t - 5700) / 1000;
-    const p = s1 >= 0 && s1 <= 1 ? s1 : s2 >= 0 && s2 <= 1 ? s2 : -1;
-    $('streak').style.opacity = p < 0 ? 0 : 1;
-    if (p >= 0) $('streak').style.left = (p * 150 - 30) + '%';
-
-    // terminal log (last 6 lines), typed out
-    const lines = [];
-    for (const [at, label, status] of LOG) {
-      if (t < at) break;
-      lines.push('> ' + (label.padEnd(26, '.') + ' ' + status).slice(0, Math.floor((t - at) / 16)));
-    }
-    if (lines.length && Math.floor(t / 300) % 2) lines[lines.length - 1] += '_';
-    $('bootLog').textContent = lines.slice(-6).join('\n');
-
-    drawGauge(t);
-
-    // lamp-test bars: wave, left-to-right sweep, staggered drop
-    const maxH = bootCanvas._h - 18;
-    for (let i = 0; i < BARS; i++) {
-      let f = 0;
-      if (t > 3000 && t < 5000) f = (0.5 + 0.5 * Math.sin((t - 3000) * 0.006 - i * 0.55)) * clamp((t - 3000) / 600) * 0.85;
-      else if (t >= 5000 && t < 5900) f = clamp(((t - 5000) / 900) * (BARS + 3) - i);
-      else if (t >= 5900) f = clamp(1 - (t - 5900 - i * 30) / 420);
-      heights[i] = f * maxH; peaks[i] = f * maxH;
-    }
-    drawBars(bootCanvas, bctx, heights, peaks);
-
-    $('welcome').style.opacity = clamp((t - 5900) / 700);
-
-    const pct = Math.floor(smooth(clamp(t / DUR)) * 100);
-    $('progress-fill').style.width = pct + '%';
-    $('pct-display').textContent = String(pct).padStart(2, '0') + '%';
-    let st = STAGES[0][1]; for (const [q, txt] of STAGES) if (pct >= q) st = txt;
-    $('status-line').textContent = st;
-
-    if (t >= DUR) { cancelAnimationFrame(bootRAF); finishBoot(); }
-  };
-}
-
-function finishBoot() {
-  if (audioCtx.state !== 'running') audioCtx.resume();
-  heights.fill(0); peaks.fill(0);
-  $('sys-status').textContent = 'SYS_ON';
-  $('flash').classList.add('go');
-  setTimeout(() => {
-    overlay.classList.add('out');
-    chassis.classList.remove('off'); chassis.classList.add('on');
-    isInitialized = true;
-    resizeAll();
-    lastT = performance.now();
-    requestAnimationFrame(animate);
-    setTimeout(() => { overlay.style.display = 'none'; }, 500);
-  }, 180);
-}
-
-/* ---------- start: ask for the mic FIRST, boot only once it's granted ---------- */
-overlay.addEventListener('click', async () => {
-  if (isInitialized || isBooting) return;
-  isBooting = true;
-  $('start-prompt').textContent = '[ allow microphone access ]';
-  $('sys-status').textContent = 'SYS_WAIT';
-  $('status-line').textContent = 'AWAITING_MIC_ACCESS';
-
-  // created inside the tap so iOS lets it run; 'interactive' = smallest buffer
-  if (audioCtx) { try { audioCtx.close(); } catch (e) {} }
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
-  audioCtx.resume();
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false, latency: 0 },
-      video: false
-    });
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
-    analyser.smoothingTimeConstant = 0;
-    analyser.minDecibels = -88; analyser.maxDecibels = -22;
-    micStream = stream;                       // keep a reference so iOS doesn't drop the tracks
-    const src = audioCtx.createMediaStreamSource(stream);
-    const mute = audioCtx.createGain(); mute.gain.value = 0;
-    src.connect(analyser);
-    analyser.connect(mute); mute.connect(audioCtx.destination);   // Safari only processes a graph that reaches an output
-    await audioCtx.resume();                  // the permission prompt can leave the context suspended
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-    waveformArray = new Uint8Array(analyser.fftSize);
-    const binHz = audioCtx.sampleRate / analyser.fftSize;
-    binRanges = FREQ_BOUNDS.map(([lo, hi]) => {
-      const a = Math.max(1, Math.floor(lo / binHz));
-      return [a, Math.min(Math.max(a, Math.ceil(hi / binHz)), dataArray.length - 1)];
-    });
-    micReady = true;
-  } catch (err) {
-    alert('Microphone permission is required to analyze audio.');
-    console.error(err);
-    isBooting = false;
-    $('start-prompt').textContent = '[ tap screen to initialize ]';
-    $('sys-status').textContent = 'SYS_OFF'; $('status-line').textContent = 'READY TO INITIALIZE';
-    return;
-  }
-
-  // permission granted: now the show starts
-  $('start-prompt').style.display = 'none';
-  overlay.classList.add('booting', 'overlay-booting');
-  document.body.classList.add('overlay-booting');
-  $('sys-status').textContent = 'SYS_BOOT';
-  resizeAll();   // canvases only have a size once the boot stage is visible
-  bootRAF = requestAnimationFrame(bootFrame(performance.now()));
-});
-
-// any touch can wake a suspended/interrupted context (phone call, app switch, etc.)
-document.addEventListener('pointerdown', () => { if (audioCtx && audioCtx.state !== 'running') audioCtx.resume(); });
-
-/* ---------- live analyzer ---------- */
-let lastT = 0;
-function animate(now) {
-  requestAnimationFrame(animate);
-  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
-  if (audioCtx.state !== 'running') audioCtx.resume();
-  analyser.getByteFrequencyData(dataArray);
-  analyser.getByteTimeDomainData(waveformArray);
-
-  const maxH = canvas._h - 18;
-  for (let i = 0; i < BARS; i++) {
-    const [lo, hi] = binRanges[i];
-    let sum = 0, mx = 0;
-    for (let j = lo; j <= hi; j++) { const v = dataArray[j]; sum += v; if (v > mx) mx = v; }
-    // blend of average and max: punchier and more reactive than average alone
-    const raw = 0.5 * (sum / (hi - lo + 1)) + 0.5 * mx;
-    let target = Math.pow(Math.min(255, raw * (1 + i * 0.08)) / 255, 1.15) * maxH;
-
-    // transient emphasis: sudden rises overshoot a bit so hits feel instant
-    const flux = Math.max(0, target - prevTarget[i]);
-    prevTarget[i] = target;
-    target = Math.min(maxH, target + flux * 0.45);
-
-    // instant attack, time-based decay (consistent on 60 / 120 Hz screens)
-    if (target > heights[i]) heights[i] = target;
-    else heights[i] = Math.max(0, heights[i] - (260 + (heights[i] - target) * 6) * dt);
-
-    if (heights[i] >= peaks[i]) { peaks[i] = heights[i]; peakTimers[i] = 0.13; }
-    else if (peakTimers[i] > 0) peakTimers[i] -= dt;
-    else peaks[i] = Math.max(0, peaks[i] - 90 * dt);
-  }
-  drawBars(canvas, ctx, heights, peaks, waveformArray, now);
-}
-</script>
-</body>
-</html>
+    // headlight
