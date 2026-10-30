@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Voyager Audio Works - Nocturne Spectrum / XY Analyzer</title>
+<title>Voyager Audio Works - Nocturne Spectrum Analyzer</title>
 <link rel="apple-touch-icon" href="IMG_3897.jpeg">
 <link rel="icon" type="image/png" href="IMG_3897.jpeg">
 <style>
@@ -80,7 +80,7 @@ transition:opacity .45s ease,transform .45s ease}
   <div id="overlay">
     <div id="flash"></div><div id="streak"></div>
     <div class="center-branding">
-      <div class="exact-logo-frame" id="logoFrame"><img src="logo.png" alt="Voyager Audio Works Logo"></div>
+      <div class="exact-logo-frame" id="logoFrame"><img src="logo.png" alt="Voyager Audio Works Logo" onerror="this.style.display='none'"></div>
       <div class="brand-title-group">
         <div class="brand-main-title">Voyager</div>
         <div class="brand-sub-title">Audio Works</div>
@@ -131,7 +131,6 @@ const overlay = $('overlay'), chassis = $('chassis'), logoFrame = $('logoFrame')
 setInterval(() => { $('time-display').textContent = new Date().toTimeString().split(' ')[0]; }, 1000);
 
 const BARS = 24;
-// Logarithmic bands preserve useful low-frequency detail while spreading the highs.
 const FREQ_BOUNDS = Array.from({length:BARS}, (_, i) => {
   const minHz = 30, maxHz = 16000;
   const lo = minHz * Math.pow(maxHz / minHz, i / BARS);
@@ -153,12 +152,14 @@ function setupCanvas(c, cx) {
   c.width = Math.round(c._w * dpr); c.height = Math.round(c._h * dpr);
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function resizeAll() { setupCanvas(canvas, ctx); setupCanvas(bootCanvas, bctx); setupCanvas(gaugeCanvas, gctx); }
+function resizeAll() {
+  setupCanvas(canvas, ctx);
+  setupCanvas(bootCanvas, bctx);
+  setupCanvas(gaugeCanvas, gctx);
+}
 window.addEventListener('resize', resizeAll);
 
-/* Shared renderer.
-   Boot mode intentionally draws only the lamp-test spectrum. The live-only
-   oscillator and bass meter are enabled after the boot sequence completes. */
+/* Shared renderer. Boot mode intentionally draws only the lamp-test spectrum. */
 function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false) {
   const w = c._w, h = c._h;
   cx.clearRect(0, 0, w, h);
@@ -173,10 +174,10 @@ function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false)
   const padX = 8;
   const avail = w - padX * 2;
 
+  let oscH = 0;
   if (live && waveform) {
-    // Single-line time-domain oscillator.
     const oscTop = 7;
-    const oscH = Math.max(28, h * .19);
+    oscH = Math.max(28, h * .19);
     const midY = oscTop + oscH / 2;
     const amp = oscH * .43;
 
@@ -220,7 +221,6 @@ function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false)
     cx.textAlign = 'left';
     cx.fillText('SIGNAL / TIME DOMAIN', padX + 2, oscTop + 7);
 
-    // Horizontal low-frequency / bass energy meter.
     const bassY = oscTop + oscH + 8;
     const bassH = 5;
     const bassW = avail;
@@ -246,8 +246,6 @@ function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false)
     cx.fillText('SUB ENERGY', w - padX, bassY + 14);
   }
 
-  // Spectrum remains the primary lower display. During boot, it expands to
-  // use the full short lamp-test canvas; live mode reserves room above.
   const top = live && waveform ? Math.max(oscH + 39, h * .40) : 4;
   const baseY = h - (live ? 17 : 5);
   const maxH = Math.max(8, baseY - top);
@@ -297,7 +295,7 @@ function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false)
   }
 }
 
-/* ---------- boot sequence: night-noir VIP sedan welcome (7s) ---------- */
+/* ---------- boot sequence ---------- */
 const DUR = 7000;
 const LOG = [
   [300,  'VAW-80 FIRMWARE 2.4',    'OK'],
@@ -312,13 +310,15 @@ const STAGES = [[0,'COLD_START'],[15,'WARMING_TUBES'],[30,'GAUGE_SELF_CHECK'],[5
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = x => x * x * (3 - 2 * x);
 
-// Optitron-style gauge: ticks weld on one by one, needle sweeps to redline, then settles
 function drawGauge(t) {
   const w = gaugeCanvas._w, h = gaugeCanvas._h, g = gctx;
   g.clearRect(0, 0, w, h);
   const cx = w / 2, cy = h - 8, R = Math.min(h - 14, w * 0.36), N = 31;
   const lit = clamp((t - 900) / 1100) * N;
-  g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '7px monospace';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.font = '7px monospace';
+
   for (let i = 0; i < N; i++) {
     const f = i / (N - 1), a = Math.PI + f * Math.PI, major = i % 5 === 0;
     const col = f > .85 ? '#d99ab9' : f > .7 ? '#83b7c7' : '#a8c5d1';
@@ -326,10 +326,19 @@ function drawGauge(t) {
     const cos = Math.cos(a), sin = Math.sin(a), r1 = R - (major ? 11 : 6);
     g.strokeStyle = on ? col : 'rgba(119,58,77,.22)';
     g.lineWidth = major ? 2 : 1;
-    g.shadowColor = col; g.shadowBlur = on ? 6 : 0;
-    g.beginPath(); g.moveTo(cx + cos * r1, cy + sin * r1); g.lineTo(cx + cos * R, cy + sin * R); g.stroke();
-    if (major && on) { g.shadowBlur = 0; g.fillStyle = 'rgba(232,200,154,.7)'; g.fillText(i / 5, cx + cos * (R - 20), cy + sin * (R - 20)); }
+    g.shadowColor = col;
+    g.shadowBlur = on ? 6 : 0;
+    g.beginPath();
+    g.moveTo(cx + cos * r1, cy + sin * r1);
+    g.lineTo(cx + cos * R, cy + sin * R);
+    g.stroke();
+    if (major && on) {
+      g.shadowBlur = 0;
+      g.fillStyle = 'rgba(232,200,154,.7)';
+      g.fillText(i / 5, cx + cos * (R - 20), cy + sin * (R - 20));
+    }
   }
+
   if (t > 800) {
     let v;
     if (t < 2000) v = 0;
@@ -337,9 +346,19 @@ function drawGauge(t) {
     else if (t < 4400) v = 1 - 0.86 * smooth((t - 3300) / 1100);
     else v = 0.14 + 0.012 * Math.sin(t * 0.012);
     const a = Math.PI + v * Math.PI, cos = Math.cos(a), sin = Math.sin(a);
-    g.strokeStyle = '#d99ab9'; g.shadowColor = '#d99ab9'; g.shadowBlur = 8; g.lineWidth = 2;
-    g.beginPath(); g.moveTo(cx + cos * 8, cy + sin * 8); g.lineTo(cx + cos * (R - 3), cy + sin * (R - 3)); g.stroke();
-    g.fillStyle = '#a8c5d1'; g.shadowColor = '#a8c5d1'; g.beginPath(); g.arc(cx, cy, 3, 0, 7); g.fill();
+    g.strokeStyle = '#d99ab9';
+    g.shadowColor = '#d99ab9';
+    g.shadowBlur = 8;
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(cx + cos * 8, cy + sin * 8);
+    g.lineTo(cx + cos * (R - 3), cy + sin * (R - 3));
+    g.stroke();
+    g.fillStyle = '#a8c5d1';
+    g.shadowColor = '#a8c5d1';
+    g.beginPath();
+    g.arc(cx, cy, 3, 0, 7);
+    g.fill();
   }
   g.shadowBlur = 0;
 }
@@ -349,9 +368,244 @@ function bootFrame(t0) {
     const t = now - t0;
     bootRAF = requestAnimationFrame(loop);
 
-    // logo: power-cycle dip, then slow fade up and a breathing champagne glow
     logoFrame.style.opacity = t < 300 ? 1 - 0.95 * (t / 300) : 0.05 + 0.95 * smooth(clamp((t - 300) / 1500));
     const br = 0.5 + 0.5 * Math.sin(t * 0.004);
     logoFrame.style.filter = `drop-shadow(0 0 ${12 + 14 * br}px rgba(232,200,154,${0.12 + 0.14 * br}))`;
 
-    // headlight
+    const s1 = (t - 500) / 1300, s2 = (t - 5700) / 1000;
+    const p = s1 >= 0 && s1 <= 1 ? s1 : s2 >= 0 && s2 <= 1 ? s2 : -1;
+    $('streak').style.opacity = p < 0 ? 0 : 1;
+    if (p >= 0) $('streak').style.left = (p * 150 - 30) + '%';
+
+    const lines = [];
+    for (const [at, label, status] of LOG) {
+      if (t < at) break;
+      lines.push('> ' + (label.padEnd(26, '.') + ' ' + status).slice(0, Math.floor((t - at) / 16)));
+    }
+    if (lines.length && Math.floor(t / 300) % 2) lines[lines.length - 1] += '_';
+    $('bootLog').textContent = lines.slice(-6).join('\n');
+
+    drawGauge(t);
+
+    const maxH = bootCanvas._h - 18;
+    for (let i = 0; i < BARS; i++) {
+      let f = 0;
+      if (t > 3000 && t < 5000) f = (0.5 + 0.5 * Math.sin((t - 3000) * 0.006 - i * 0.55)) * clamp((t - 3000) / 600) * 0.85;
+      else if (t >= 5000 && t < 5900) f = clamp(((t - 5000) / 900) * (BARS + 3) - i);
+      else if (t >= 5900) f = clamp(1 - (t - 5900 - i * 30) / 420);
+      heights[i] = f * maxH;
+      peaks[i] = f * maxH;
+    }
+    drawBars(bootCanvas, bctx, heights, peaks, null, 0, false);
+
+    $('welcome').style.opacity = clamp((t - 5900) / 700);
+
+    const pct = Math.floor(smooth(clamp(t / DUR)) * 100);
+    $('progress-fill').style.width = pct + '%';
+    $('pct-display').textContent = String(pct).padStart(2, '0') + '%';
+    let st = STAGES[0][1];
+    for (const [q, txt] of STAGES) if (pct >= q) st = txt;
+    $('status-line').textContent = st;
+
+    if (t >= DUR) {
+      cancelAnimationFrame(bootRAF);
+      finishBoot();
+    }
+  };
+}
+
+function finishBoot() {
+  if (audioCtx.state !== 'running') audioCtx.resume();
+  heights.fill(0);
+  peaks.fill(0);
+  $('sys-status').textContent = 'SYS_ON';
+  $('flash').classList.add('go');
+
+  setTimeout(() => {
+    overlay.classList.add('out');
+    chassis.classList.remove('off');
+    chassis.classList.add('on');
+    isInitialized = true;
+    resizeAll();
+    lastT = performance.now();
+    requestAnimationFrame(animate);
+    setTimeout(() => { overlay.style.display = 'none'; }, 500);
+  }, 180);
+}
+
+/* ---------- startup and microphone permissions ---------- */
+async function startAnalyzer(event) {
+  if (event) event.preventDefault();
+  if (isInitialized || isBooting) return;
+
+  isBooting = true;
+  $('start-prompt').textContent = '[ requesting microphone access ]';
+  $('sys-status').textContent = 'SYS_WAIT';
+  $('status-line').textContent = 'AWAITING_MIC_ACCESS';
+
+  try {
+    if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('SECURE_CONTEXT_REQUIRED');
+    }
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) throw new Error('AUDIO_CONTEXT_UNSUPPORTED');
+
+    if (audioCtx && audioCtx.state !== 'closed') {
+      try { await audioCtx.close(); } catch (closeError) { console.warn(closeError); }
+    }
+
+    audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
+    await audioCtx.resume();
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        autoGainControl: false,
+        noiseSuppression: false
+      },
+      video: false
+    });
+    micStream = stream;
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0;
+    analyser.minDecibels = -88;
+    analyser.maxDecibels = -22;
+
+    const source = audioCtx.createMediaStreamSource(stream);
+    const silentOutput = audioCtx.createGain();
+    silentOutput.gain.value = 0;
+    source.connect(analyser);
+    analyser.connect(silentOutput);
+    silentOutput.connect(audioCtx.destination);
+
+    await audioCtx.resume();
+
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    waveformArray = new Uint8Array(analyser.fftSize);
+    const binHz = audioCtx.sampleRate / analyser.fftSize;
+
+    binRanges = FREQ_BOUNDS.map(([lo, hi]) => {
+      const firstBin = Math.max(1, Math.floor(lo / binHz));
+      const lastBin = Math.min(Math.max(firstBin, Math.ceil(hi / binHz)), dataArray.length - 1);
+      return [firstBin, lastBin];
+    });
+
+    micReady = true;
+  } catch (err) {
+    console.error('Voyager microphone initialization failed:', err);
+
+    if (micStream) {
+      micStream.getTracks().forEach(track => track.stop());
+      micStream = null;
+    }
+
+    if (audioCtx && audioCtx.state !== 'closed') {
+      try { await audioCtx.close(); } catch (closeError) { console.warn(closeError); }
+    }
+
+    audioCtx = null;
+    isBooting = false;
+
+    let message = 'MIC ACCESS FAILED — TAP TO RETRY';
+    let status = 'CHECK MIC PERMISSIONS';
+
+    if (err && err.message === 'SECURE_CONTEXT_REQUIRED') {
+      message = '[ open this page over HTTPS ]';
+      status = 'HTTPS REQUIRED';
+    } else if (err && err.message === 'AUDIO_CONTEXT_UNSUPPORTED') {
+      message = '[ browser audio is unsupported ]';
+      status = 'AUDIO UNSUPPORTED';
+    } else if (err && err.name === 'NotFoundError') {
+      message = '[ no microphone was found ]';
+      status = 'MICROPHONE NOT FOUND';
+    } else if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+      message = '[ allow microphone in browser settings, then tap ]';
+      status = 'MICROPHONE BLOCKED';
+    }
+
+    $('start-prompt').textContent = message;
+    $('sys-status').textContent = 'SYS_OFF';
+    $('status-line').textContent = status;
+    return;
+  }
+
+  // The boot animation begins only after microphone access succeeds.
+  $('start-prompt').style.display = 'none';
+  overlay.classList.add('booting', 'overlay-booting');
+  document.body.classList.add('overlay-booting');
+  $('sys-status').textContent = 'SYS_BOOT';
+  resizeAll();
+  bootRAF = requestAnimationFrame(bootFrame(performance.now()));
+}
+
+overlay.addEventListener('click', startAnalyzer);
+
+document.addEventListener('pointerdown', () => {
+  if (audioCtx && audioCtx.state !== 'running') audioCtx.resume();
+});
+
+/* ---------- live analyzer ---------- */
+let lastT = 0;
+
+function animate(now) {
+  requestAnimationFrame(animate);
+
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  if (audioCtx.state !== 'running') audioCtx.resume();
+
+  analyser.getByteFrequencyData(dataArray);
+  analyser.getByteTimeDomainData(waveformArray);
+
+  const maxH = Math.max(12, canvas._h * .48);
+
+  const bassEnd = Math.max(
+    2,
+    Math.min(dataArray.length - 1, Math.ceil(180 / (audioCtx.sampleRate / analyser.fftSize)))
+  );
+
+  let bassSum = 0;
+  for (let j = 1; j <= bassEnd; j++) bassSum += dataArray[j];
+
+  const bassRaw = bassSum / bassEnd;
+  const bassLevel = clamp(Math.pow(bassRaw / 190, 1.15));
+
+  for (let i = 0; i < BARS; i++) {
+    const [lo, hi] = binRanges[i];
+    let sum = 0, mx = 0;
+
+    for (let j = lo; j <= hi; j++) {
+      const v = dataArray[j];
+      sum += v;
+      if (v > mx) mx = v;
+    }
+
+    const raw = 0.5 * (sum / (hi - lo + 1)) + 0.5 * mx;
+    let target = Math.pow(Math.min(255, raw * (1 + i * 0.08)) / 255, 1.15) * maxH;
+
+    const flux = Math.max(0, target - prevTarget[i]);
+    prevTarget[i] = target;
+    target = Math.min(maxH, target + flux * 0.45);
+
+    if (target > heights[i]) heights[i] = target;
+    else heights[i] = Math.max(0, heights[i] - (260 + (heights[i] - target) * 6) * dt);
+
+    if (heights[i] >= peaks[i]) {
+      peaks[i] = heights[i];
+      peakTimers[i] = 0.13;
+    } else if (peakTimers[i] > 0) {
+      peakTimers[i] -= dt;
+    } else {
+      peaks[i] = Math.max(0, peaks[i] - 90 * dt);
+    }
+  }
+
+  drawBars(canvas, ctx, heights, peaks, waveformArray, bassLevel, true);
+}
+</script>
+</body>
+</html>
