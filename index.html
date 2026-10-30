@@ -3,30 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Voyager Audio Works - Spectrum Analyzer</title>
+<title>Voyager Audio Works - Nocturne Spectrum / XY Analyzer</title>
 <link rel="apple-touch-icon" href="IMG_3897.jpeg">
 <link rel="icon" type="image/png" href="IMG_3897.jpeg">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
-body,html{width:100vw;height:100vh;height:100dvh;background:#050406;font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif;overflow:hidden;display:flex;justify-content:center;align-items:center}
-.vfd-container{width:100vw;height:100vh;height:100dvh;background:radial-gradient(circle at center,#151316 0%,#0c0b0e 85%,#050406 100%);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;gap:8px;
+body,html{width:100vw;height:100vh;height:100dvh;background:#050611;font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif;overflow:hidden;display:flex;justify-content:center;align-items:center}
+.vfd-container{width:100vw;height:100vh;height:100dvh;background:radial-gradient(circle at center,#121326 0%,#090b18 85%,#050611 100%);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;gap:8px;
 padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
 .chassis-screw{position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#3a3237 0%,#151214 90%);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 2px rgba(0,0,0,.8);z-index:30}
 .chassis-screw::after{content:"";position:absolute;top:3px;left:1px;width:6px;height:1px;background:rgba(0,0,0,.8)}
 .screw-tl{top:6px;left:6px}.screw-tr{top:6px;right:6px}.screw-bl{bottom:6px;left:6px}.screw-br{bottom:6px;right:6px}
-.vfd-container::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.45) 50%),radial-gradient(circle,rgba(238,134,149,.02) 1px,transparent 1px);background-size:100% 3px,4px 4px;z-index:40;pointer-events:none;opacity:.85}
+.vfd-container::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.45) 50%),radial-gradient(circle,rgba(105,190,213,.025) 1px,transparent 1px);background-size:100% 3px,4px 4px;z-index:40;pointer-events:none;opacity:.85}
 .vfd-header{height:34px;display:flex;justify-content:space-between;align-items:center;gap:8px;z-index:4}
-.faceplate-bay{background:#080709;border:1px solid rgba(119,58,77,.25);border-top-color:rgba(0,0,0,.85);border-left-color:rgba(0,0,0,.85);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.03);display:flex;align-items:center;padding:0 10px}
+.faceplate-bay{background:#080709;border:1px solid rgba(103,113,157,.25);border-top-color:rgba(0,0,0,.85);border-left-color:rgba(0,0,0,.85);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.03);display:flex;align-items:center;padding:0 10px}
 .name-bay{height:100%;flex:0 1 auto;gap:8px}
-.status-led{width:5px;height:5px;border-radius:50%;background:#ee8695;box-shadow:0 0 6px #ee8695}
+.status-led{width:5px;height:5px;border-radius:50%;background:#d99ab9;box-shadow:0 0 6px #d99ab9}
 .device-name{font-size:9px;letter-spacing:2px;color:rgba(238,134,149,.65);font-weight:600;text-transform:uppercase}
 .header-vent-bay{height:100%;flex:1 1 auto;max-width:140px;justify-content:space-evenly;padding:0 8px;background:#060507}
-.vent-slat{width:2px;height:16px;background:rgba(0,0,0,.9);border-right:1px solid rgba(119,58,77,.3)}
+.vent-slat{width:2px;height:16px;background:rgba(0,0,0,.9);border-right:1px solid rgba(103,113,157,.3)}
 .clock-bay{height:100%;flex:0 0 auto}
 .time-display{font-size:9px;letter-spacing:1.5px;color:rgba(207,120,98,.55);font-family:monospace}
-.vis-container{flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;z-index:2;overflow:hidden;padding:4px}
+.vis-container{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;z-index:2;overflow:hidden;padding:4px}
 #visCanvas{position:absolute;top:0;left:0;width:100%;height:100%}
-.freq-legend{position:absolute;bottom:2px;left:8px;right:8px;display:flex;justify-content:space-between;font-family:monospace;font-size:6.5px;color:rgba(119,58,77,.6);pointer-events:none;z-index:3;letter-spacing:.5px}
+.freq-legend{position:absolute;bottom:2px;left:8px;right:8px;display:flex;justify-content:space-between;font-family:monospace;font-size:6.5px;color:rgba(112,139,178,.65);pointer-events:none;z-index:3;letter-spacing:.5px}
 
 /* Power-on flicker for the main faceplate */
 .vfd-container.off .vfd-header .faceplate-bay,.vfd-container.off .vis-container{opacity:0}
@@ -44,32 +44,32 @@ transition:opacity .45s ease,transform .45s ease}
 #overlay::after{content:"";position:absolute;left:0;right:0;height:2px;top:-4px;background:linear-gradient(90deg,transparent,rgba(238,134,149,.7),transparent);box-shadow:0 0 14px rgba(238,134,149,.6);opacity:0}
 #overlay.booting::after{opacity:1;animation:sweep 2.4s linear infinite}
 @keyframes sweep{to{top:100%}}
-#flash{position:absolute;inset:0;background:radial-gradient(circle,#ee8695 0%,rgba(207,120,98,.4) 40%,transparent 75%);opacity:0;pointer-events:none;z-index:25}
+#flash{position:absolute;inset:0;background:radial-gradient(circle,#d99ab9 0%,rgba(207,120,98,.4) 40%,transparent 75%);opacity:0;pointer-events:none;z-index:25}
 #flash.go{animation:flashgo .5s ease-out}
 @keyframes flashgo{0%{opacity:.85}100%{opacity:0}}
 .center-branding{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;width:100%;max-width:520px;min-height:0}
 .exact-logo-frame{width:80%;max-width:400px;display:flex;justify-content:center;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(238,134,149,.25))}
 .exact-logo-frame img{width:100%;height:auto;max-height:24vh;object-fit:contain;display:block;border-radius:4px}
 .brand-title-group{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:4px}
-.brand-main-title{font-size:14px;font-weight:700;letter-spacing:5px;color:#ee8695;text-transform:uppercase;text-shadow:0 0 10px rgba(238,134,149,.4)}
-.brand-sub-title{font-size:9px;font-weight:500;letter-spacing:4px;color:#cf7862;text-transform:uppercase}
+.brand-main-title{font-size:14px;font-weight:700;letter-spacing:5px;color:#d99ab9;text-transform:uppercase;text-shadow:0 0 10px rgba(238,134,149,.4)}
+.brand-sub-title{font-size:9px;font-weight:500;letter-spacing:4px;color:#83b7c7;text-transform:uppercase}
 .brand-copyright{font-size:8px;letter-spacing:2px;color:rgba(207,120,98,.5);font-family:monospace;margin-top:8px}
 .start-prompt{margin-top:16px;font-size:9px;letter-spacing:2.5px;color:rgba(238,134,149,.7);text-transform:uppercase;animation:pulse-glow 2s infinite ease-in-out}
 @keyframes pulse-glow{0%,100%{opacity:.35}50%{opacity:.95}}
 .boot-stage{width:100%;margin-top:12px;display:none}
 .overlay-booting .boot-stage{display:block}
 #gaugeCanvas{width:100%;height:96px;display:block;margin-bottom:6px}
-#bootCanvas{width:100%;height:50px;display:block;background:#080709;border:1px solid rgba(119,58,77,.25);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
+#bootCanvas{width:100%;height:50px;display:block;background:#080709;border:1px solid rgba(103,113,157,.25);border-radius:3px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
 #bootLog{margin-top:8px;font-family:monospace;font-size:8px;letter-spacing:1px;line-height:1.55;color:rgba(207,120,98,.8);text-align:left;white-space:pre;height:calc(8px*1.55*6);overflow:hidden;padding:0 4px}
-.status-bar-container{width:100%;max-width:520px;background:rgba(12,10,13,.95);border:1px solid rgba(119,58,77,.3);border-radius:4px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 2px 12px rgba(0,0,0,.6)}
+.status-bar-container{width:100%;max-width:520px;background:rgba(12,10,13,.95);border:1px solid rgba(103,113,157,.3);border-radius:4px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 2px 12px rgba(0,0,0,.6)}
 .status-readouts{display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:8.5px;letter-spacing:1.5px;color:rgba(207,120,98,.85);text-transform:uppercase}
 .status-readouts span{display:flex;align-items:center;gap:6px}
-.status-indicator{width:5px;height:5px;border-radius:50%;background:#ee8695;box-shadow:0 0 6px #ee8695}
+.status-indicator{width:5px;height:5px;border-radius:50%;background:#d99ab9;box-shadow:0 0 6px #d99ab9}
 .overlay-booting .status-indicator{animation:pulse-glow .5s infinite}
-.boot-progress-bar{width:100%;height:5px;background:rgba(45,26,38,.7);border:1px solid rgba(119,58,77,.25);border-radius:2px;overflow:hidden}
-.boot-progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#543246,#773a4d 40%,#cf7862 75%,#ee8695);box-shadow:0 0 10px rgba(238,134,149,.8)}
+.boot-progress-bar{width:100%;height:5px;background:rgba(45,26,38,.7);border:1px solid rgba(103,113,157,.25);border-radius:2px;overflow:hidden}
+.boot-progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#30334f,#51466e 40%,#83b7c7 75%,#d99ab9);box-shadow:0 0 10px rgba(238,134,149,.8)}
 #streak{position:absolute;top:22%;left:-30%;width:30%;height:90px;background:linear-gradient(90deg,transparent,rgba(232,200,154,.16) 45%,rgba(255,236,210,.5) 50%,rgba(232,200,154,.16) 55%,transparent);filter:blur(7px);opacity:0;pointer-events:none;z-index:24;mix-blend-mode:screen}
-#welcome{margin-top:8px;font-size:9px;letter-spacing:9px;color:#e8c89a;text-transform:uppercase;opacity:0;text-shadow:0 0 12px rgba(232,200,154,.55);padding-left:9px}
+#welcome{margin-top:8px;font-size:9px;letter-spacing:9px;color:#a8c5d1;text-transform:uppercase;opacity:0;text-shadow:0 0 12px rgba(232,200,154,.55);padding-left:9px}
 </style>
 </head>
 <body>
@@ -116,7 +116,7 @@ transition:opacity .45s ease,transform .45s ease}
   <div class="vis-container faceplate-bay">
     <canvas id="visCanvas"></canvas>
     <div class="freq-legend">
-      <span>30Hz</span><span>80</span><span>180</span><span>320</span><span>600</span><span>1k</span><span>1.8k</span><span>2.8k</span><span>4.2k</span><span>6k</span><span>8.5k</span><span>16kHz</span>
+      <span>30Hz</span><span>60</span><span>120</span><span>250</span><span>500</span><span>1k</span><span>2k</span><span>4k</span><span>8k</span><span>16kHz</span>
     </div>
   </div>
 </div>
@@ -130,12 +130,18 @@ const overlay = $('overlay'), chassis = $('chassis'), logoFrame = $('logoFrame')
 
 setInterval(() => { $('time-display').textContent = new Date().toTimeString().split(' ')[0]; }, 1000);
 
-const BARS = 12;
-const FREQ_BOUNDS = [[30,80],[80,180],[180,320],[320,600],[600,1000],[1000,1800],[1800,2800],[2800,4200],[4200,6000],[6000,8500],[8500,12000],[12000,16000]];
-const COLORS = ['#543246','#773a4d','#a75252','#cf7862','#ee8695'];
-const BLOCK_H = 4, BLOCK_GAP = 2.3, STEP = BLOCK_H + BLOCK_GAP;
+const BARS = 24;
+// Logarithmic bands preserve useful low-frequency detail while spreading the highs.
+const FREQ_BOUNDS = Array.from({length:BARS}, (_, i) => {
+  const minHz = 30, maxHz = 16000;
+  const lo = minHz * Math.pow(maxHz / minHz, i / BARS);
+  const hi = minHz * Math.pow(maxHz / minHz, (i + 1) / BARS);
+  return [lo, hi];
+});
+const COLORS = ['#34304f','#51416d','#72527f','#94617f','#bd7188','#d59a9b'];
+const BLOCK_H = 3, BLOCK_GAP = 1.7, STEP = BLOCK_H + BLOCK_GAP;
 
-let audioCtx, analyser, dataArray, binRanges;
+let audioCtx, analyser, dataArray, waveformArray, binRanges;
 let isInitialized = false, isBooting = false, micReady = false, bootRAF = 0, micStream = null;
 
 const heights = new Float32Array(BARS), peaks = new Float32Array(BARS), peakTimers = new Float32Array(BARS), prevTarget = new Float32Array(BARS);
@@ -150,15 +156,86 @@ function setupCanvas(c, cx) {
 function resizeAll() { setupCanvas(canvas, ctx); setupCanvas(bootCanvas, bctx); setupCanvas(gaugeCanvas, gctx); }
 window.addEventListener('resize', resizeAll);
 
-/* Shared renderer: no per-segment shadowBlur (that was a big source of frame lag on iOS).
-   Segments are batched into one path per colour, and glow is faked with translucent rects. */
-function drawBars(c, cx, hts, pks) {
+/* Shared renderer: segmented spectrum + restrained Lissajous display.
+   No per-segment shadowBlur; paths are batched to stay smooth on mobile. */
+function drawBars(c, cx, hts, pks, waveform = null, clock = 0) {
   const w = c._w, h = c._h;
   cx.clearRect(0, 0, w, h);
+
+  // Dark glass, subtle horizontal calibration lines and a faint central axis.
+  const bg = cx.createLinearGradient(0, 0, 0, h);
+  bg.addColorStop(0, 'rgba(12,13,27,.96)');
+  bg.addColorStop(.55, 'rgba(13,10,24,.94)');
+  bg.addColorStop(1, 'rgba(5,7,15,.98)');
+  cx.fillStyle = bg; cx.fillRect(0, 0, w, h);
+
+  const oscH = Math.max(48, h * .34);
+  const oscTop = 7, oscBottom = oscTop + oscH;
+  const midX = w / 2, midY = oscTop + oscH / 2;
+  cx.strokeStyle = 'rgba(113,119,170,.12)';
+  cx.lineWidth = 1;
+  for (let i = 1; i <= 4; i++) {
+    const y = oscTop + (oscH * i / 5);
+    cx.beginPath(); cx.moveTo(8, y); cx.lineTo(w - 8, y); cx.stroke();
+  }
+  cx.setLineDash([2, 5]);
+  cx.beginPath(); cx.moveTo(midX, oscTop); cx.lineTo(midX, oscBottom); cx.stroke();
+  cx.setLineDash([]);
+
+  // Lissajous figure: microphone samples drive X and a phase-shifted sample drives Y.
+  // A slow phase drift adds movement even when the incoming signal is steady.
+  const trace = new Path2D();
+  const samples = waveform ? waveform.length : 256;
+  const radiusX = Math.min(w * .31, 190);
+  const radiusY = oscH * .39;
+  const phase = clock * .00032;
+  const points = Math.min(samples, 512);
+  for (let i = 0; i < points; i++) {
+    let x, y;
+    if (waveform) {
+      const a = (waveform[i] - 128) / 128;
+      const j = (i + Math.floor(points * .23)) % points;
+      const b = (waveform[j] - 128) / 128;
+      x = a;
+      y = b * .88 + Math.sin(i / points * Math.PI * 2 + phase) * .08;
+    } else {
+      const a = i / points * Math.PI * 2;
+      x = Math.sin(3 * a + phase);
+      y = Math.sin(4 * a);
+    }
+    const px = midX + x * radiusX;
+    const py = midY + y * radiusY;
+    if (i === 0) trace.moveTo(px, py); else trace.lineTo(px, py);
+  }
+  cx.save();
+  cx.beginPath(); cx.rect(6, oscTop, w - 12, oscH); cx.clip();
+  cx.strokeStyle = 'rgba(95,210,220,.13)';
+  cx.lineWidth = 5; cx.stroke(trace);
+  cx.strokeStyle = 'rgba(124,194,213,.76)';
+  cx.lineWidth = 1.15; cx.stroke(trace);
+  cx.strokeStyle = 'rgba(224,151,184,.42)';
+  cx.lineWidth = .65;
+  cx.translate(.8, -.5); cx.stroke(trace);
+  cx.restore();
+
+  // Oscillator frame and tiny instrument labels.
+  cx.strokeStyle = 'rgba(115,126,175,.22)';
+  cx.strokeRect(7.5, oscTop + .5, w - 15, oscH - 1);
+  cx.font = '6px monospace';
+  cx.fillStyle = 'rgba(147,164,194,.52)';
+  cx.textAlign = 'left';
+  cx.fillText('XY / LISSAJOUS', 12, oscTop + 9);
+  cx.textAlign = 'right';
+  cx.fillText('PHASE ' + (Math.round((phase % (Math.PI * 2)) * 57.3)).toString().padStart(3,'0'), w - 12, oscTop + 9);
+
+  // Spectrum occupies the lower portion, leaving the oscillator readable.
   const padX = 8, avail = w - padX * 2;
-  const gap = Math.max(2, Math.floor(avail * 0.015 * 0.65));
-  const bw = Math.floor((avail - gap * (BARS - 1)) / BARS);
-  const baseY = h - 14, maxH = h - 18, maxSeg = Math.floor(maxH / STEP);
+  const gap = Math.max(1, Math.floor(avail * .006));
+  const bw = Math.max(2, (avail - gap * (BARS - 1)) / BARS);
+  const baseY = h - 12;
+  const spectrumTop = oscBottom + 9;
+  const maxH = Math.max(12, baseY - spectrumTop);
+  const maxSeg = Math.max(1, Math.floor(maxH / STEP));
 
   const ghost = new Path2D();
   const paths = COLORS.map(() => new Path2D());
@@ -166,23 +243,31 @@ function drawBars(c, cx, hts, pks) {
   let x = padX;
   for (let i = 0; i < BARS; i++) {
     for (let s = 0; s < maxSeg; s++) ghost.rect(x, baseY - s * STEP, bw, BLOCK_H);
-    const active = Math.floor(hts[i] / STEP);
+    const active = Math.min(maxSeg, Math.floor(hts[i] / STEP));
     for (let s = 0; s < active; s++) {
       const r = s / maxSeg;
-      const ci = r < .35 ? 0 : r < .60 ? 1 : r < .80 ? 2 : r < .92 ? 3 : 4;
+      const ci = r < .25 ? 0 : r < .43 ? 1 : r < .60 ? 2 : r < .75 ? 3 : r < .89 ? 4 : 5;
       paths[ci].rect(x, baseY - s * STEP, bw, BLOCK_H);
     }
     if (active > 0) {
       const ty = baseY - (active - 1) * STEP;
-      glow.rect(x - 2, ty - 3, bw + 4, BLOCK_H + 6);
+      glow.rect(x - 1, ty - 2, bw + 2, BLOCK_H + 4);
     }
-    if (pks[i] > 2) caps.rect(x, baseY - pks[i], bw, 2);
+    if (pks[i] > 2) caps.rect(x, baseY - Math.min(maxH, pks[i]), bw, 1.5);
     x += bw + gap;
   }
-  cx.fillStyle = 'rgba(84,50,70,0.16)'; cx.fill(ghost);
-  cx.fillStyle = 'rgba(238,134,149,0.18)'; cx.fill(glow);
+  cx.fillStyle = 'rgba(74,74,112,.17)'; cx.fill(ghost);
+  cx.fillStyle = 'rgba(103,185,205,.10)'; cx.fill(glow);
   COLORS.forEach((col, i) => { cx.fillStyle = col; cx.fill(paths[i]); });
-  cx.fillStyle = '#ee8695'; cx.fill(caps);
+  cx.fillStyle = '#d6a2bd'; cx.fill(caps);
+
+  // Fine baseline and restrained frequency ticks.
+  cx.fillStyle = 'rgba(132,148,183,.38)';
+  cx.fillRect(padX, baseY + 3, avail, 1);
+  for (let i = 0; i < 12; i++) {
+    const tx = padX + avail * i / 11;
+    cx.fillRect(tx, baseY + 4, 1, i % 3 === 0 ? 4 : 2);
+  }
 }
 
 /* ---------- boot sequence: night-noir VIP sedan welcome (7s) ---------- */
@@ -192,7 +277,7 @@ const LOG = [
   [1100, 'MIC BUS HANDSHAKE',      'LOCK'],
   [1900, 'ANALOG STAGE WARM-UP',   'OK'],
   [2800, 'CABIN ACOUSTIC PROFILE', 'FLAT'],
-  [3800, '1024-PT FFT / 12 BAND',  'OK'],
+  [3800, '2048-PT FFT / 24 BAND',  'OK'],
   [4800, 'VFD SEGMENT TEST',       'RUN'],
   [5900, 'ALL SYSTEMS',            'NOMINAL']
 ];
@@ -209,7 +294,7 @@ function drawGauge(t) {
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '7px monospace';
   for (let i = 0; i < N; i++) {
     const f = i / (N - 1), a = Math.PI + f * Math.PI, major = i % 5 === 0;
-    const col = f > .85 ? '#ee8695' : f > .7 ? '#cf7862' : '#e8c89a';
+    const col = f > .85 ? '#d99ab9' : f > .7 ? '#83b7c7' : '#a8c5d1';
     const on = i < lit;
     const cos = Math.cos(a), sin = Math.sin(a), r1 = R - (major ? 11 : 6);
     g.strokeStyle = on ? col : 'rgba(119,58,77,.22)';
@@ -225,9 +310,9 @@ function drawGauge(t) {
     else if (t < 4400) v = 1 - 0.86 * smooth((t - 3300) / 1100);
     else v = 0.14 + 0.012 * Math.sin(t * 0.012);
     const a = Math.PI + v * Math.PI, cos = Math.cos(a), sin = Math.sin(a);
-    g.strokeStyle = '#ee8695'; g.shadowColor = '#ee8695'; g.shadowBlur = 8; g.lineWidth = 2;
+    g.strokeStyle = '#d99ab9'; g.shadowColor = '#d99ab9'; g.shadowBlur = 8; g.lineWidth = 2;
     g.beginPath(); g.moveTo(cx + cos * 8, cy + sin * 8); g.lineTo(cx + cos * (R - 3), cy + sin * (R - 3)); g.stroke();
-    g.fillStyle = '#e8c89a'; g.shadowColor = '#e8c89a'; g.beginPath(); g.arc(cx, cy, 3, 0, 7); g.fill();
+    g.fillStyle = '#a8c5d1'; g.shadowColor = '#a8c5d1'; g.beginPath(); g.arc(cx, cy, 3, 0, 7); g.fill();
   }
   g.shadowBlur = 0;
 }
@@ -317,7 +402,7 @@ overlay.addEventListener('click', async () => {
       video: false
     });
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 1024;
+    analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0;
     analyser.minDecibels = -88; analyser.maxDecibels = -22;
     micStream = stream;                       // keep a reference so iOS doesn't drop the tracks
@@ -327,6 +412,7 @@ overlay.addEventListener('click', async () => {
     analyser.connect(mute); mute.connect(audioCtx.destination);   // Safari only processes a graph that reaches an output
     await audioCtx.resume();                  // the permission prompt can leave the context suspended
     dataArray = new Uint8Array(analyser.frequencyBinCount);
+    waveformArray = new Uint8Array(analyser.fftSize);
     const binHz = audioCtx.sampleRate / analyser.fftSize;
     binRanges = FREQ_BOUNDS.map(([lo, hi]) => {
       const a = Math.max(1, Math.floor(lo / binHz));
@@ -361,6 +447,7 @@ function animate(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
   if (audioCtx.state !== 'running') audioCtx.resume();
   analyser.getByteFrequencyData(dataArray);
+  analyser.getByteTimeDomainData(waveformArray);
 
   const maxH = canvas._h - 18;
   for (let i = 0; i < BARS; i++) {
@@ -384,7 +471,7 @@ function animate(now) {
     else if (peakTimers[i] > 0) peakTimers[i] -= dt;
     else peaks[i] = Math.max(0, peaks[i] - 90 * dt);
   }
-  drawBars(canvas, ctx, heights, peaks);
+  drawBars(canvas, ctx, heights, peaks, waveformArray, now);
 }
 </script>
 </body>
