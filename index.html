@@ -30,11 +30,11 @@ padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 
 
 /* Power-on flicker for the main faceplate */
 .vfd-container.off .vfd-header .faceplate-bay,.vfd-container.off .vis-container{opacity:0}
-@keyframes flick{0%{opacity:0}8%{opacity:.9}14%{opacity:.1}26%{opacity:1}34%{opacity:.35}46%{opacity:1}100%{opacity:1}}
-.vfd-container.on .vfd-header .faceplate-bay{animation:flick .7s both}
+@keyframes flick{0%{opacity:.35}100%{opacity:1}}
+.vfd-container.on .vfd-header .faceplate-bay{animation:flick .55s ease-out both}
 .vfd-container.on .vfd-header .faceplate-bay:nth-child(2){animation-delay:.12s}
 .vfd-container.on .vfd-header .faceplate-bay:nth-child(3){animation-delay:.24s}
-.vfd-container.on .vis-container{animation:flick .9s .3s both}
+.vfd-container.on .vis-container{animation:flick .65s .15s ease-out both}
 
 /* Boot overlay */
 #overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,#120d10 0%,#07050a 55%,#020203 100%);overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;align-items:center;z-index:20;cursor:pointer;
@@ -42,10 +42,10 @@ padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 
 transition:opacity .45s ease,transform .45s ease}
 #overlay.out{opacity:0;transform:scale(1.05);pointer-events:none}
 #overlay::after{content:"";position:absolute;left:0;right:0;height:2px;top:-4px;background:linear-gradient(90deg,transparent,rgba(238,134,149,.7),transparent);box-shadow:0 0 14px rgba(238,134,149,.6);opacity:0}
-#overlay.booting::after{opacity:1;animation:sweep 2.4s linear infinite}
+#overlay.booting::after{opacity:0;animation:none}
 @keyframes sweep{to{top:100%}}
 #flash{position:absolute;inset:0;background:radial-gradient(circle,#d99ab9 0%,rgba(207,120,98,.4) 40%,transparent 75%);opacity:0;pointer-events:none;z-index:25}
-#flash.go{animation:flashgo .5s ease-out}
+#flash.go{animation:flashgo .18s ease-out}
 @keyframes flashgo{0%{opacity:.85}100%{opacity:0}}
 .center-branding{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;width:100%;max-width:520px;min-height:0}
 .exact-logo-frame{width:80%;max-width:400px;display:flex;justify-content:center;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(238,134,149,.25))}
@@ -208,33 +208,31 @@ function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false)
   let baseY = h - 5;
 
   if (live && waveform) {
-    // Give the oscillator a real instrument well with a height that scales
-    // sensibly in both portrait and landscape orientations.
     const oscTop = 5;
     const oscH = clamp(h * .235, 48, 112);
+    const xySize = Math.min(oscH - 8, Math.max(42, avail * .27));
+    const xyX = padX + avail - xySize - 7;
+    const traceLeft = padX + 7;
+    const traceRight = xyX - 10;
+    const traceW = Math.max(24, traceRight - traceLeft);
     const midY = oscTop + oscH * .55;
-    const amp = oscH * .39;
+    const amp = oscH * .34;
     drawInstrumentPanel(cx, padX, oscTop, avail, oscH, 'SIGNAL / TIME DOMAIN');
 
-    // Fine centerline and restrained upper/lower reference marks.
-    cx.strokeStyle = 'rgba(112,139,176,.23)';
+    // Main time-domain trace occupies the left side of the instrument well.
+    cx.strokeStyle = 'rgba(112,139,176,.22)';
     cx.lineWidth = 1;
     cx.beginPath();
-    cx.moveTo(padX + 5, midY);
-    cx.lineTo(w - padX - 5, midY);
+    cx.moveTo(traceLeft, midY);
+    cx.lineTo(traceRight, midY);
     cx.stroke();
-    cx.strokeStyle = 'rgba(112,132,172,.13)';
+    cx.strokeStyle = 'rgba(112,132,172,.12)';
     cx.setLineDash([2, 5]);
-    cx.beginPath();
-    cx.moveTo(padX + 5, oscTop + 17);
-    cx.lineTo(w - padX - 5, oscTop + 17);
-    cx.moveTo(padX + 5, oscTop + oscH - 5);
-    cx.lineTo(w - padX - 5, oscTop + oscH - 5);
-    cx.stroke();
+    for (const yy of [oscTop + 17, oscTop + oscH - 5]) {
+      cx.beginPath(); cx.moveTo(traceLeft, yy); cx.lineTo(traceRight, yy); cx.stroke();
+    }
     cx.setLineDash([]);
 
-    // Remove DC offset and apply adaptive gain so ordinary listening levels
-    // produce a readable trace without requiring hard clipping or loud peaks.
     let mean = 0;
     for (let i = 0; i < waveform.length; i++) mean += waveform[i];
     mean /= waveform.length;
@@ -245,58 +243,64 @@ function drawBars(c, cx, hts, pks, waveform = null, bassLevel = 0, live = false)
     }
     const rms = Math.sqrt(sumSq / waveform.length);
     const adaptiveGain = clamp(0.30 / (rms + 0.018), 1.5, 5.5);
-
+    const sampleStep = Math.max(1, Math.floor(waveform.length / Math.max(1, traceW)));
     cx.beginPath();
-    const sampleStep = Math.max(1, Math.floor(waveform.length / Math.max(1, avail)));
     let first = true;
     for (let i = 0; i < waveform.length; i += sampleStep) {
       const raw = (waveform[i] - mean) / 128;
       const shaped = Math.tanh(raw * adaptiveGain * 2.15);
-      const x = padX + 5 + (i / (waveform.length - 1)) * (avail - 10);
+      const x = traceLeft + (i / (waveform.length - 1)) * traceW;
       const y = midY - shaped * amp;
-      if (first) { cx.moveTo(x, y); first = false; }
-      else cx.lineTo(x, y);
+      if (first) { cx.moveTo(x, y); first = false; } else cx.lineTo(x, y);
     }
-    cx.lineJoin = 'round';
-    cx.lineCap = 'round';
-    cx.strokeStyle = 'rgba(103,202,216,.18)';
-    cx.lineWidth = 4;
-    cx.stroke();
-    cx.strokeStyle = '#a4cbd3';
-    cx.lineWidth = 1.35;
-    cx.stroke();
+    cx.lineJoin = 'round'; cx.lineCap = 'round';
+    cx.strokeStyle = 'rgba(103,202,216,.16)'; cx.lineWidth = 4; cx.stroke();
+    cx.strokeStyle = '#a4cbd3'; cx.lineWidth = 1.25; cx.stroke();
 
-    // Individual low-frequency meter well, with a thicker readable bar.
-    const bassY = oscTop + oscH + 8;
-    const bassH = 12;
+    // Compact XY / Lissajous phase scope. A delayed copy of the mono input
+    // supplies the second axis, producing a stable phase portrait from one mic.
+    const xyY = oscTop + (oscH - xySize) / 2 + 1;
+    drawInstrumentPanel(cx, xyX - 3, xyY - 3, xySize + 6, xySize + 6, '');
+    cx.fillStyle = 'rgba(151,166,194,.68)';
+    cx.font = '5.5px monospace'; cx.textAlign = 'left'; cx.textBaseline = 'top';
+    cx.fillText('XY / PHASE', xyX + 2, xyY - 1);
+    const inset = 5, plotX = xyX + inset, plotY = xyY + inset + 5;
+    const plotSize = xySize - inset * 2 - 5, center = plotSize / 2;
+    cx.strokeStyle = 'rgba(112,139,176,.2)'; cx.lineWidth = 1;
+    cx.strokeRect(plotX, plotY, plotSize, plotSize);
+    cx.beginPath();
+    cx.moveTo(plotX + center, plotY + 1); cx.lineTo(plotX + center, plotY + plotSize - 1);
+    cx.moveTo(plotX + 1, plotY + center); cx.lineTo(plotX + plotSize - 1, plotY + center);
+    cx.stroke();
+    const delay = Math.max(8, Math.floor(waveform.length / 16));
+    cx.beginPath();
+    const stride = Math.max(1, Math.floor(waveform.length / 220));
+    for (let i = delay; i < waveform.length; i += stride) {
+      const xv = Math.tanh(((waveform[i] - mean) / 128) * adaptiveGain * 1.65);
+      const yv = Math.tanh(((waveform[i - delay] - mean) / 128) * adaptiveGain * 1.65);
+      const px = plotX + center + xv * (center - 2);
+      const py = plotY + center - yv * (center - 2);
+      if (i === delay) cx.moveTo(px, py); else cx.lineTo(px, py);
+    }
+    cx.lineJoin = 'round'; cx.lineCap = 'round';
+    cx.strokeStyle = 'rgba(103,202,216,.18)'; cx.lineWidth = 3; cx.stroke();
+    cx.strokeStyle = '#d6a2bd'; cx.lineWidth = 1; cx.stroke();
+
+    const bassY = oscTop + oscH + 8, bassH = 12;
     drawInstrumentPanel(cx, padX, bassY - 3, avail, 31, 'LOW / BASS ENERGY');
-    const meterX = padX + 7;
-    const meterW = avail - 14;
-    cx.fillStyle = 'rgba(58,61,91,.58)';
-    cx.fillRect(meterX, bassY + 11, meterW, bassH);
-    cx.strokeStyle = 'rgba(129,145,178,.28)';
-    cx.strokeRect(meterX + .5, bassY + 11.5, meterW - 1, bassH - 1);
-
-    // Quiet calibration ticks make the bar feel like a physical instrument.
-    cx.strokeStyle = 'rgba(170,181,205,.24)';
-    cx.lineWidth = 1;
+    const meterX = padX + 7, meterW = avail - 14;
+    cx.fillStyle = 'rgba(58,61,91,.58)'; cx.fillRect(meterX, bassY + 11, meterW, bassH);
+    cx.strokeStyle = 'rgba(129,145,178,.28)'; cx.strokeRect(meterX + .5, bassY + 11.5, meterW - 1, bassH - 1);
+    cx.strokeStyle = 'rgba(170,181,205,.24)'; cx.lineWidth = 1;
     for (let i = 1; i < 8; i++) {
       const tx = meterX + meterW * i / 8;
-      cx.beginPath();
-      cx.moveTo(tx, bassY + 8);
-      cx.lineTo(tx, bassY + 10);
-      cx.stroke();
+      cx.beginPath(); cx.moveTo(tx, bassY + 8); cx.lineTo(tx, bassY + 10); cx.stroke();
     }
-
-    const level = clamp(bassLevel);
-    const fillW = Math.max(0, (meterW - 2) * level);
+    const level = clamp(bassLevel), fillW = Math.max(0, (meterW - 2) * level);
     const bassGrad = cx.createLinearGradient(meterX, 0, meterX + meterW, 0);
-    bassGrad.addColorStop(0, '#59618b');
-    bassGrad.addColorStop(.58, '#7d829f');
-    bassGrad.addColorStop(1, '#d69ab5');
+    bassGrad.addColorStop(0, '#59618b'); bassGrad.addColorStop(.58, '#7d829f'); bassGrad.addColorStop(1, '#d69ab5');
     cx.fillStyle = bassGrad;
     if (fillW > 0) cx.fillRect(meterX + 1, bassY + 12, fillW, bassH - 2);
-
     spectrumTop = bassY + 35;
     baseY = h - 18;
   }
@@ -382,10 +386,10 @@ function drawGauge(t) {
   }
   if (t > 800) {
     let v;
-    if (t < 2000) v = 0;
-    else if (t < 3300) v = 1 - Math.pow(1 - (t - 2000) / 1300, 3);
-    else if (t < 4400) v = 1 - 0.86 * smooth((t - 3300) / 1100);
-    else v = 0.14 + 0.012 * Math.sin(t * 0.012);
+    if (t < 1900) v = 0;
+    else if (t < 3900) v = 0.78 * smooth((t - 1900) / 2000);
+    else if (t < 5200) v = 0.78 - 0.64 * smooth((t - 3900) / 1300);
+    else v = 0.14;
     const a = Math.PI + v * Math.PI, cos = Math.cos(a), sin = Math.sin(a);
     g.strokeStyle = '#d99ab9'; g.shadowColor = '#d99ab9'; g.shadowBlur = 8; g.lineWidth = 2;
     g.beginPath(); g.moveTo(cx + cos * 8, cy + sin * 8); g.lineTo(cx + cos * (R - 3), cy + sin * (R - 3)); g.stroke();
@@ -401,20 +405,17 @@ function bootFrame(t0) {
 
     // logo: power-cycle dip, then slow fade up and a breathing champagne glow
     logoFrame.style.opacity = t < 300 ? 1 - 0.95 * (t / 300) : 0.05 + 0.95 * smooth(clamp((t - 300) / 1500));
-    const br = 0.5 + 0.5 * Math.sin(t * 0.004);
-    logoFrame.style.filter = `drop-shadow(0 0 ${12 + 14 * br}px rgba(232,200,154,${0.12 + 0.14 * br}))`;
+    const br = 0.5 + 0.5 * Math.sin(t * 0.0015);
+    logoFrame.style.filter = `drop-shadow(0 0 ${10 + 4 * br}px rgba(232,200,154,${0.10 + 0.04 * br}))`;
 
-    // headlight streaks sweep across the screen twice
-    const s1 = (t - 500) / 1300, s2 = (t - 5700) / 1000;
-    const p = s1 >= 0 && s1 <= 1 ? s1 : s2 >= 0 && s2 <= 1 ? s2 : -1;
-    $('streak').style.opacity = p < 0 ? 0 : 1;
-    if (p >= 0) $('streak').style.left = (p * 150 - 30) + '%';
+    // No sweeping streaks: the startup readout remains calm and legible.
+    $('streak').style.opacity = 0;
 
     // terminal log (last 6 lines), typed out
     const lines = [];
     for (const [at, label, status] of LOG) {
       if (t < at) break;
-      lines.push('> ' + (label.padEnd(26, '.') + ' ' + status).slice(0, Math.floor((t - at) / 16)));
+      lines.push('> ' + (label.padEnd(26, '.') + ' ' + status).slice(0, Math.floor((t - at) / 28)));
     }
     if (lines.length && Math.floor(t / 300) % 2) lines[lines.length - 1] += '_';
     $('bootLog').textContent = lines.slice(-6).join('\n');
@@ -425,9 +426,9 @@ function bootFrame(t0) {
     const maxH = bootCanvas._h - 18;
     for (let i = 0; i < BARS; i++) {
       let f = 0;
-      if (t > 3000 && t < 5000) f = (0.5 + 0.5 * Math.sin((t - 3000) * 0.006 - i * 0.55)) * clamp((t - 3000) / 600) * 0.85;
-      else if (t >= 5000 && t < 5900) f = clamp(((t - 5000) / 900) * (BARS + 3) - i);
-      else if (t >= 5900) f = clamp(1 - (t - 5900 - i * 30) / 420);
+      if (t >= 2600 && t < 5000) f = 0.72 * smooth(clamp((t - 2600 - i * 38) / 520));
+      else if (t >= 5000 && t < 6100) f = 0.72 + 0.28 * smooth(clamp((t - 5000) / 900));
+      else if (t >= 6100) f = 1;
       heights[i] = f * maxH; peaks[i] = f * maxH;
     }
     drawBars(bootCanvas, bctx, heights, peaks, null, 0, false);
@@ -448,7 +449,7 @@ function finishBoot() {
   if (audioCtx.state !== 'running') audioCtx.resume();
   heights.fill(0); peaks.fill(0);
   $('sys-status').textContent = 'SYS_ON';
-  $('flash').classList.add('go');
+  // Clean handoff: no full-screen flash.
   setTimeout(() => {
     overlay.classList.add('out');
     chassis.classList.remove('off'); chassis.classList.add('on');
